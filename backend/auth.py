@@ -18,8 +18,8 @@ from database import get_connection
 auth_bp = Blueprint("auth", __name__)
 
 # ── Configuração ────────────────────────────────────────────────
-# ⚠️  Em produção, mova para variável de ambiente (os.environ)
-SECRET_KEY = "fiscal_finance_squad_2026_secret"   # >= 32 bytes para HS256
+import os
+SECRET_KEY = os.getenv("SECRET_KEY", "fiscal_finance_squad_2026_secret")   # >= 32 bytes para HS256
 
 
 # ── Inicialização da tabela de usuários (FISC-14) ───────────────

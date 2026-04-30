@@ -4,6 +4,9 @@
 
 import json
 import os
+from dotenv import load_dotenv
+load_dotenv()  # Carrega as variaveis do arquivo .env (se existir)
+
 from flask import Flask, jsonify, send_from_directory
 from flask_cors import CORS
 from flasgger import Swagger
