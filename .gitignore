@@ -39,3 +39,6 @@ desktop.ini
 
 # === Logs ===
 *.log
+
+# === Variaveis de ambiente ===
+.env
