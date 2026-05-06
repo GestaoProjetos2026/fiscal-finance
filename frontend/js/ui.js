@@ -112,6 +112,11 @@ function emptyRow(cols, msg = 'Nenhum registro encontrado.') {
   return `<tr><td colspan="${cols}" style="text-align:center;padding:36px;color:var(--text-secondary);">${msg}</td></tr>`;
 }
 
+// ─── Loading em tabela ────────────────────────────────────────
+function loadingRow(cols, msg = 'Carregando dados...') {
+  return `<tr><td colspan="${cols}" style="text-align:center;padding:36px;color:var(--text-secondary);"><span class="spinner" style="margin-right:8px;vertical-align:middle;"></span>${msg}</td></tr>`;
+}
+
 // Exporta globalmente
 window.toast = toast;
 window.openModal = openModal;
@@ -124,3 +129,4 @@ window.fillUserSidebar = fillUserSidebar;
 window.handleLogout = handleLogout;
 window.setActiveNav = setActiveNav;
 window.emptyRow = emptyRow;
+window.loadingRow = loadingRow;

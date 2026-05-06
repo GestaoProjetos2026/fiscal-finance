@@ -333,6 +333,7 @@ ul, ol { list-style: none; }
   transition: border-color var(--transition), box-shadow var(--transition);
   outline: none;
   -webkit-appearance: none;
+  appearance: none;
 }
 
 .form-control:focus {
@@ -594,6 +595,46 @@ tbody td {
 }
 
 /* ─── Responsive ─────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .sidebar {
+    transform: translateX(-100%);
+  }
+  .sidebar.open {
+    transform: translateX(0);
+    box-shadow: var(--shadow-md);
+  }
+  .main-content {
+    margin-left: 0;
+  }
+  #btn-mobile-menu {
+    display: inline-block !important;
+  }
+  .stat-grid, .form-row, .form-row-3 {
+    grid-template-columns: 1fr;
+  }
+  .topbar {
+    padding: 0 16px;
+  }
+  .page-content {
+    padding: 16px;
+  }
+  .table-wrapper {
+    border-radius: 0;
+    border-left: none;
+    border-right: none;
+    margin: 0 -16px;
+  }
+  #toast-container {
+    left: 20px;
+    right: 20px;
+    align-items: center;
+  }
+  .toast {
+    min-width: 0;
+    width: 100%;
+  }
+}
+
 /* ─── Scrollbar dark ────────────────────────────────────── */
 ::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: var(--bg-main); }

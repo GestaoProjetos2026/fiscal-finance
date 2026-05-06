@@ -42,7 +42,20 @@ async function apiFetch(path, options = {}) {
     headers
   });
 
-  const json = await res.json();
+  let json = {};
+  try {
+    json = await res.json();
+  } catch (e) {
+    json = { message: 'Erro ao processar resposta do servidor.' };
+  }
+
+  if (!res.ok && !options.silent) {
+    const errMsg = json.message || json.error || `Erro na requisição (${res.status})`;
+    if (window.toast) {
+      window.toast(errMsg, 'error');
+    }
+  }
+
   return { ok: res.ok, status: res.status, body: json };
 }
 

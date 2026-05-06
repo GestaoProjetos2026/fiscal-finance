@@ -65,7 +65,10 @@ function injectLayout(pageId, pageTitle) {
 
     <div class="main-content">
       <header class="topbar">
-        <span class="topbar-title" id="topbar-title">${pageTitle}</span>
+        <div class="flex-center gap-12">
+          <button id="btn-mobile-menu" class="hidden" style="color:var(--text-primary);font-size:20px;">☰</button>
+          <span class="topbar-title" id="topbar-title">${pageTitle}</span>
+        </div>
         <div class="topbar-right">
           <span style="font-size:12px;color:var(--text-secondary);" id="topbar-clock"></span>
         </div>
@@ -94,6 +97,21 @@ function injectLayout(pageId, pageTitle) {
 
   // Preenche dados do user
   fillUserSidebar();
+
+  // Menu mobile toggle
+  const btnMenu = document.getElementById('btn-mobile-menu');
+  const sidebar = document.getElementById('sidebar');
+  if (btnMenu && sidebar) {
+    btnMenu.addEventListener('click', () => {
+      sidebar.classList.toggle('open');
+    });
+    // Fecha a sidebar se clicar fora dela no mobile
+    document.addEventListener('click', (e) => {
+      if (window.innerWidth <= 768 && !sidebar.contains(e.target) && !btnMenu.contains(e.target)) {
+        sidebar.classList.remove('open');
+      }
+    });
+  }
 
   // Mostra API Tester somente para admin
   const _u = getUser();
