@@ -337,8 +337,8 @@ async function runEndpoint() {
 
   // Monta URL
   const url = activeEp.buildUrl
-    ? `http://localhost:5000${activeEp.buildUrl(fieldValues)}`
-    : `http://localhost:5000${activeEp.path}`;
+    ? activeEp.buildUrl(fieldValues)
+    : activeEp.path;
 
   // Monta headers
   const headers = { 'Content-Type': 'application/json' };
@@ -396,7 +396,7 @@ async function runEndpoint() {
 
   } catch (err) {
     document.getElementById('resp-status').innerHTML = `<span class="status-pill status-err">❌ ERRO DE REDE</span>`;
-    document.getElementById('response-box').textContent = `ERRO: ${err.message}\n\nVerifique se o servidor Flask está rodando em http://localhost:5000`;
+    document.getElementById('response-box').textContent = `ERRO: ${err.message}\n\nVerifique se a API está rodando corretamente`;
   }
 
   setLoading(btn, false);

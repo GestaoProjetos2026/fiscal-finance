@@ -3,7 +3,7 @@
 // Todas as chamadas HTTP do sistema passam por aqui
 // ============================================================
 
-const API_BASE = 'http://localhost:5000/v1/fisc';
+const API_BASE = '/v1/fisc';
 
 // ─── Token JWT (localStorage) ────────────────────────────────
 function getToken() {
