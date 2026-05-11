@@ -46,6 +46,10 @@ function injectLayout(pageId, pageTitle) {
 
         <div class="nav-section-label">Ferramentas</div>
 
+        <a class="nav-item" data-page="usuarios" href="usuarios.html" id="nav-usuarios" style="display:none;">
+          <span class="nav-icon">👥</span> Gestão de Usuários
+        </a>
+
         <a class="nav-item" data-page="api-tester" href="api-tester.html" id="nav-api-tester" style="display:none;">
           <span class="nav-icon">🧪</span> API Tester
         </a>
@@ -100,11 +104,13 @@ function injectLayout(pageId, pageTitle) {
   // Preenche dados do user
   fillUserSidebar();
 
-  // Mostra API Tester somente para admin
+  // Mostra links restritos somente para admin
   const _u = getUser();
   if (_u && _u.papel === 'admin') {
     const navTester = document.getElementById('nav-api-tester');
     if (navTester) navTester.style.display = '';
+    const navUsuarios = document.getElementById('nav-usuarios');
+    if (navUsuarios) navUsuarios.style.display = '';
   }
 
   // Relógio no topbar
