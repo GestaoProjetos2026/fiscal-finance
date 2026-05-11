@@ -17,6 +17,7 @@ from invoice    import invoice_bp
 from auth       import auth_bp, init_db_auth
 from public_api import public_bp
 from stock      import stock_bp   # FISC-19: entrada de estoque
+from usuarios   import usuarios_bp
 
 app = Flask(__name__)
 
@@ -53,6 +54,7 @@ app.register_blueprint(products_bp, url_prefix="/v1/fisc")
 app.register_blueprint(cashflow_bp, url_prefix="/v1/fisc")
 app.register_blueprint(invoice_bp,  url_prefix="/v1/fisc")
 app.register_blueprint(stock_bp,    url_prefix="/v1/fisc")   # FISC-19
+app.register_blueprint(usuarios_bp, url_prefix="/v1/fisc")
 app.register_blueprint(public_bp,   url_prefix="/v1")      # prefixo /v1 (public já inclui /public/fisc)
 
 

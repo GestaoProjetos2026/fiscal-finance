@@ -77,6 +77,30 @@ const Auth = {
   }
 };
 
+// ─── USUÁRIOS (Admin) ─────────────────────────────────────────
+const Usuarios = {
+  async listar() {
+    return apiFetch('/usuarios');
+  },
+  async criar(dados) {
+    return apiFetch('/usuarios', {
+      method: 'POST',
+      body: JSON.stringify(dados)
+    });
+  },
+  async editarPapel(id, papel) {
+    return apiFetch(`/usuarios/${id}/role`, {
+      method: 'PUT',
+      body: JSON.stringify({ papel })
+    });
+  },
+  async remover(id) {
+    return apiFetch(`/usuarios/${id}`, {
+      method: 'DELETE'
+    });
+  }
+};
+
 // ─── PRODUTOS ─────────────────────────────────────────────────
 const Produtos = {
   async listar(nome = '') {
@@ -162,7 +186,7 @@ const Caixa = {
 };
 
 // ─── Exporta globalmente ──────────────────────────────────────
-window.API = { Auth, Produtos, Estoque, Notas, Caixa };
+window.API = { Auth, Usuarios, Produtos, Estoque, Notas, Caixa };
 window.getToken = getToken;
 window.setToken = setToken;
 window.clearToken = clearToken;
