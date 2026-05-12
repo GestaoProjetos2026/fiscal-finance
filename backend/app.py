@@ -5,7 +5,9 @@
 import json
 import os
 from dotenv import load_dotenv
-load_dotenv()  # Carrega as variaveis do arquivo .env (se existir)
+
+# FISC-MOD5-02: Carrega as variáveis do arquivo .env (Segurança de credenciais)
+load_dotenv()
 
 from flask import Flask, jsonify, send_from_directory
 from flask_cors import CORS
@@ -20,6 +22,11 @@ from stock      import stock_bp   # FISC-19: entrada de estoque
 from usuarios   import usuarios_bp
 
 app = Flask(__name__)
+
+# ── Configuração de Produção e Segurança ──────────────────────
+# FISC-MOD5-01: Se o ambiente for produção, força o esquema HTTPS
+if os.environ.get("FLASK_ENV") == "production":
+    app.config['PREFERRED_URL_SCHEME'] = 'https'
 
 # ── CORS — permite que o frontend web (qualquer origem local) acesse a API ──
 CORS(app)
@@ -49,7 +56,7 @@ Swagger(app, config=swagger_config, template=_openapi_spec)
 
 
 # ── Registra os módulos com o prefixo /v1/fisc ────────────────
-app.register_blueprint(auth_bp,     url_prefix="/v1/fisc")
+app.register_blueprint(auth_bp,    url_prefix="/v1/fisc")
 app.register_blueprint(products_bp, url_prefix="/v1/fisc")
 app.register_blueprint(cashflow_bp, url_prefix="/v1/fisc")
 app.register_blueprint(invoice_bp,  url_prefix="/v1/fisc")
@@ -138,4 +145,6 @@ if __name__ == "__main__":
     print("  Pressione CTRL+C para parar.")
     print("=" * 65)
 
-    app.run(debug=False, host="0.0.0.0", port=5000)
+    # FISC-MOD5-04: Ambiente de produção não deve usar debug=True
+    is_debug = os.environ.get("FLASK_ENV") != "production"
+    app.run(debug=is_debug, host="0.0.0.0", port=5000)
