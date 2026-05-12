@@ -10,6 +10,7 @@
 
 import hashlib
 import datetime
+import os
 from flask import Blueprint, request, jsonify, g
 import jwt
 
@@ -17,9 +18,10 @@ from database import get_connection
 
 auth_bp = Blueprint("auth", __name__)
 
-# ── Configuração ────────────────────────────────────────────────
-import os
-SECRET_KEY = os.getenv("SECRET_KEY", "fiscal_finance_squad_2026_secret")   # >= 32 bytes para HS256
+# ── Configuração (FISC-MOD5-02) ──────────────────────────────────
+# A SECRET_KEY agora é lida obrigatoriamente do ambiente ou do arquivo .env.
+# Isso impede que a chave real de produção fique exposta no histórico do GitHub.
+SECRET_KEY = os.environ.get("SECRET_KEY", "dev_secret_only_dont_use_in_prod")
 
 
 # ── Inicialização da tabela de usuários (FISC-14) ───────────────
