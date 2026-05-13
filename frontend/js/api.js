@@ -54,6 +54,11 @@ async function apiFetch(path, options = {}) {
     if (window.toast) {
       window.toast(errMsg, 'error');
     }
+    // Se o token for inválido ou expirado, desloga automaticamente
+    if (res.status === 401) {
+      clearToken();
+      window.location.href = 'index.html';
+    }
   }
 
   return { ok: res.ok, status: res.status, body: json };

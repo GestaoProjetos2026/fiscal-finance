@@ -18,6 +18,7 @@ from auth       import auth_bp, init_db_auth
 from public_api import public_bp
 from stock      import stock_bp   # FISC-19: entrada de estoque
 from usuarios   import usuarios_bp
+from database   import init_db
 
 app = Flask(__name__)
 
@@ -93,6 +94,7 @@ def erro_interno(e):
 
 
 if __name__ == "__main__":
+    init_db()       # inicializa tabelas do sistema e avisa se estiver vazio
     init_db_auth()  # garante tabela usuarios + seed admin
 
     print("=" * 65)

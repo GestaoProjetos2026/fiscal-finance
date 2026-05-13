@@ -14,13 +14,19 @@ echo  ============================================================
 echo.
 
 if not exist ".env" (
-    echo  [0/3] Arquivo .env nao encontrado. Criando copia a partir do .env.example...
+    echo  [0/4] Arquivo .env nao encontrado. Criando copia a partir do .env.example...
     copy .env.example .env >nul
 )
 
-echo  [1/3] Iniciando o container (isso pode demorar na primeira vez)...
+:: REMOVE CONTAINERS ANTIGOS PARA EVITAR CONFLITOS DE NOME
+echo  [1/4] Removendo containers e redes anteriores...
+docker rm -f container-fisc >nul 2>&1
+docker compose down >nul 2>&1
+
+echo  [2/4] Iniciando o container (isso pode demorar na primeira vez)...
 docker compose up --build -d
 if %errorlevel% neq 0 (
+    echo.
     echo  [ERRO] Falha ao iniciar o Docker.
     echo         Verifique se o Docker Desktop esta aberto e rodando.
     pause
@@ -28,11 +34,11 @@ if %errorlevel% neq 0 (
 )
 
 echo.
-echo  [2/3] Aguardando aplicacao iniciar...
+echo  [3/4] Aguardando aplicacao iniciar...
 timeout /t 5 /nobreak >nul
 
 echo.
-echo  [3/3] Abrindo frontend no navegador (porta 8080)...
+echo  [4/4] Abrindo frontend no navegador (porta 8080)...
 start "" "http://localhost:8080"
 
 echo.
