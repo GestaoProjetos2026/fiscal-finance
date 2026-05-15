@@ -155,16 +155,16 @@ const Estoque = {
 
 // ─── NOTA FISCAL ──────────────────────────────────────────────
 const Notas = {
-  async calcularIntencao(itens) {
+  async calcularIntencao(itens, markup = 0) {
     return apiFetch('/invoice/intent', {
       method: 'POST',
-      body: JSON.stringify({ itens })
+      body: JSON.stringify({ itens, markup })
     });
   },
-  async confirmar(numero, descricao, itens) {
+  async confirmar(numero, descricao, itens, markup = 0) {
     return apiFetch('/invoice/confirm', {
       method: 'POST',
-      body: JSON.stringify({ numero, descricao, itens })
+      body: JSON.stringify({ numero, descricao, itens, markup })
     });
   },
   async buscar(numero) {

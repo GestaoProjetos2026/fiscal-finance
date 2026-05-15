@@ -39,6 +39,8 @@ def calcular_intencao():
     total_imposto    = 0.0
     total_final      = 0.0
 
+    markup = float(dados.get("markup", 0.0))
+
     for item in itens_req:
         sku = str(item.get("sku", "")).strip()
         qtd = item.get("quantidade", 0)
@@ -56,7 +58,11 @@ def calcular_intencao():
 
         p         = dict(produto)
         aliquota  = p.get("aliquota", p.get("aliquota_imposto", 0))
-        vb        = p["preco_base"] * qtd
+        
+        # Aplica o markup sobre o preço de custo para definir o preço de venda
+        preco_venda = p["preco_base"] * (1 + (markup / 100.0))
+        
+        vb        = preco_venda * qtd
         vi        = vb * aliquota
         vt        = vb + vi
 
@@ -135,6 +141,8 @@ def confirmar_nota():
         return jsonify({"status": "error", "data": None,
                         "message": f"Nota '{numero}' já existe."}), 409
 
+    markup = float(dados.get("markup", 0.0))
+
     # Valida e calcula todos os itens
     itens_validos = []
     skus_invalidos = []
@@ -159,11 +167,15 @@ def confirmar_nota():
             }), 422
 
         aliquota = p.get("aliquota", p.get("aliquota_imposto", 0))
-        vb = p["preco_base"] * qtd
+        
+        # Aplica o markup
+        preco_venda = p["preco_base"] * (1 + (markup / 100.0))
+        
+        vb = preco_venda * qtd
         vi = vb * aliquota
         vt = vb + vi
         itens_validos.append({**p, "quantidade": qtd, "aliquota": aliquota,
-                               "vb": vb, "vi": vi, "vt": vt})
+                               "vb": vb, "vi": vi, "vt": vt, "preco_venda": preco_venda})
 
     if skus_invalidos:
         conn.close()
@@ -191,7 +203,7 @@ def confirmar_nota():
                 INSERT INTO itens_nota
                     (nota_id, sku, quantidade, preco_base, aliquota, valor_bruto, valor_imposto, valor_total)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-            """, (nota_id, item["sku"], item["quantidade"], item["preco_base"],
+            """, (nota_id, item["sku"], item["quantidade"], item["preco_venda"],
                   item["aliquota"], item["vb"], item["vi"], item["vt"]))
 
             # 3. Baixa o estoque
