@@ -144,6 +144,40 @@
       </div>
     </div>
   </div>
+
+  <!-- ─── Calculadora de Markup ─────────────────────────── -->
+  <div class="card mt-16">
+    <div class="card-header">
+      <span class="card-title">📈 Calculadora de Markup</span>
+    </div>
+    <div class="card-body">
+      <p class="text-sm text-muted mb-16">
+        Calcule o preço de venda ideal com base no custo total (Produto + Impostos).
+      </p>
+      
+      <div class="form-row" style="align-items:flex-end;gap:10px;">
+        <div class="form-group" style="margin-bottom:0; flex:1;">
+          <label class="form-label" for="mkp-custo">Custo Base (R$)</label>
+          <input id="mkp-custo" type="number" step="0.01" class="form-control" readonly placeholder="Calcule a nota" />
+        </div>
+        <div class="form-group" style="margin-bottom:0; flex:1;">
+          <label class="form-label" for="mkp-margem">Markup (%)</label>
+          <input id="mkp-margem" type="number" step="1" value="30" class="form-control" oninput="calcularMarkup()" />
+        </div>
+      </div>
+      
+      <div class="mt-16" style="background:rgba(0,0,0,0.02); border-radius:8px; border:1px solid var(--border); padding:16px;">
+        <div class="flex-between mb-8" style="display:flex; justify-content:space-between; margin-bottom:8px;">
+          <span class="text-sm">Preço de Venda Sugerido:</span>
+          <strong id="mkp-preco" style="font-size:18px; color:var(--success);">R$ 0,00</strong>
+        </div>
+        <div class="flex-between" style="display:flex; justify-content:space-between;">
+          <span class="text-sm text-muted">Lucro Bruto Estimado:</span>
+          <strong id="mkp-lucro" class="text-muted">R$ 0,00</strong>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 
 <script src="js/api.js"></script>
@@ -281,6 +315,10 @@
     document.getElementById('resultado-vazio').style.display = 'none';
     document.getElementById('resultado-dados').classList.remove('hidden');
 
+    // Atualiza Calculadora de Markup
+    document.getElementById('mkp-custo').value = t.total_final.toFixed(2);
+    calcularMarkup();
+
     toast('Cálculo realizado. Confira os valores e confirme a nota.', 'success');
   }
 
@@ -313,6 +351,24 @@
     } else {
       toast(res.body.message, 'error');
     }
+  }
+
+  function calcularMarkup() {
+    const custo = parseFloat(document.getElementById('mkp-custo').value) || 0;
+    const margem = parseFloat(document.getElementById('mkp-margem').value) || 0;
+    
+    if (custo <= 0) {
+      document.getElementById('mkp-preco').textContent = 'R$ 0,00';
+      document.getElementById('mkp-lucro').textContent = 'R$ 0,00';
+      return;
+    }
+    
+    // Markup sobre o custo: Preço = Custo + (Custo * Margem / 100)
+    const lucro = custo * (margem / 100);
+    const preco = custo + lucro;
+    
+    document.getElementById('mkp-preco').textContent = formatBRL(preco);
+    document.getElementById('mkp-lucro').textContent = formatBRL(lucro);
   }
 </script>
 
