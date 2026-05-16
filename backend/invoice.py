@@ -37,6 +37,7 @@ def calcular_intencao():
     skus_invalidos   = []
     total_bruto      = 0.0
     total_imposto    = 0.0
+    total_lucro      = 0.0
     total_final      = 0.0
 
     markup = float(dados.get("markup", 0.0))
@@ -61,13 +62,16 @@ def calcular_intencao():
         
         # Aplica o markup sobre o preço de custo para definir o preço de venda
         preco_venda = p["preco_base"] * (1 + (markup / 100.0))
+        lucro_unitario = preco_venda - p["preco_base"]
         
         vb        = preco_venda * qtd
         vi        = vb * aliquota
         vt        = vb + vi
+        vl        = lucro_unitario * qtd
 
         total_bruto   += vb
         total_imposto += vi
+        total_lucro   += vl
         total_final   += vt
 
         itens_calculados.append({
@@ -78,6 +82,7 @@ def calcular_intencao():
             "aliquota":       aliquota,
             "valor_bruto":    round(vb, 2),
             "valor_imposto":  round(vi, 2),
+            "valor_lucro":    round(vl, 2),
             "valor_total":    round(vt, 2)
         })
 
@@ -98,6 +103,7 @@ def calcular_intencao():
             "totais": {
                 "total_bruto":    round(total_bruto,   2),
                 "total_imposto":  round(total_imposto, 2),
+                "total_lucro":    round(total_lucro, 2),
                 "total_final":    round(total_final,   2)
             }
         },

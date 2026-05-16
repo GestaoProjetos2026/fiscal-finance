@@ -123,6 +123,10 @@
               <span>Total Impostos</span>
               <span id="res-imposto" style="color:var(--danger);">—</span>
             </div>
+            <div class="totals-row">
+              <span>Lucro Bruto (Markup)</span>
+              <span id="res-lucro" style="color:var(--success); font-weight:600;">—</span>
+            </div>
             <div class="totals-row total-final">
               <span>Total Final da Nota</span>
               <span id="res-total">—</span>
@@ -276,6 +280,7 @@
     const t = ultimoCalculo.totais;
     document.getElementById('res-bruto').textContent   = formatBRL(t.total_bruto);
     document.getElementById('res-imposto').textContent = formatBRL(t.total_imposto);
+    document.getElementById('res-lucro').textContent   = formatBRL(t.total_lucro || 0);
     document.getElementById('res-total').textContent   = formatBRL(t.total_final);
 
     const tbRes = document.getElementById('tb-resultado-itens');
