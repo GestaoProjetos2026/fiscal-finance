@@ -2,7 +2,7 @@ name: Deploy Squad
 
 on:
   push:
-    branches: [ "main", "staging" ]
+    branches: [ "main", "feature/markup-calculator" ]
 
 jobs:
   deploy-job:
