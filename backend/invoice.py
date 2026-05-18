@@ -195,10 +195,13 @@ def confirmar_nota():
     try:
         agora = datetime.now().isoformat()
 
+        # Como é um projeto acadêmico, geramos um DANFE simulado direto no frontend
+        dummy_pdf_url = f"danfe.html?numero={numero}"
+
         # 1. Cria a nota
         cursor.execute(
-            "INSERT INTO notas_fiscais (numero_nota, descricao, status, data_criacao) VALUES (?, ?, 'emitida', ?)",
-            (numero, descricao, agora)
+            "INSERT INTO notas_fiscais (numero_nota, descricao, status, pdf_url, data_criacao) VALUES (?, ?, 'emitida', ?, ?)",
+            (numero, descricao, dummy_pdf_url, agora)
         )
         nota_id = cursor.lastrowid
 
@@ -239,10 +242,11 @@ def confirmar_nota():
                 "nota_id":     nota_id,
                 "numero":      numero,
                 "status":      "emitida",
+                "pdf_url":     dummy_pdf_url,
                 "total_final": round(total_final, 2),
                 "itens":       len(itens_validos)
             },
-            "message": f"Nota '{numero}' emitida com sucesso!"
+            "message": f"Nota '{numero}' emitida com sucesso (PDF Simulando Integração)!"
         }), 201
 
     except Exception as e:

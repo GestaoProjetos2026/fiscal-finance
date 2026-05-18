@@ -21,12 +21,13 @@
 12. Roadmap — Sprint 3: Telas, Dashboard, Regras e UX
 13. Roadmap — Sprint 4: Integração Total e Infraestrutura
 14. Roadmap — Sprint 5: Entrega Final
-15. Requisitos Não-Funcionais
-16. Segurança
-17. Métricas de Sucesso
-18. Riscos e Mitigações
-19. Definição de Pronto (DoD Geral)
-20. Futuro do Produto
+15. Roadmap — Sprint 6: Ajustes Finais e Deploy VM
+16. Requisitos Não-Funcionais
+17. Segurança
+18. Métricas de Sucesso
+19. Riscos e Mitigações
+20. Definição de Pronto (DoD Geral)
+21. Futuro do Produto
 
 ---
 
@@ -614,7 +615,30 @@ Levantados nesta sprint e implementados nas próximas:
 
 ---
 
-## 15. REQUISITOS NÃO-FUNCIONAIS
+## 15. SPRINT 6 — AJUSTES FINAIS E DEPLOY NA VM
+
+**Objetivo:** Executar tarefas discutidas no Comitê e preparar o deploy em nuvem (VM).
+
+**Status:** 🔵 Backlog
+
+### MOD-S6-01 — Ajustes de Interface e Padronização
+
+| ID | Task | Status |
+|---|---|---|
+| FISCFISCAL-141 | FISC-MOD6-01 — Parte do frontend discutida no Comitê | 🔵 Backlog |
+| FISCFISCAL-142 | FISC-MOD6-02 — Parte da padronização discutida no Comitê | 🔵 Backlog |
+
+### MOD-S6-02 — Funcionalidades e Deploy
+
+| ID | Task | Status |
+|---|---|---|
+| FISCFISCAL-143 | FISC-MOD6-03 — Inserir nota fiscal (DANFE simulado) e vincular às vendas | ✅ Done |
+| FISCFISCAL-144 | FISC-MOD6-04 — Deploy na VM | 🔵 Backlog |
+| FISCFISCAL-145 | FISC-MOD6-05 — Últimos testes gerais | 🔵 Backlog |
+
+---
+
+## 16. REQUISITOS NÃO-FUNCIONAIS
 
 - Aplicação executa em Windows sem instalação adicional pelo usuário final (executável PyInstaller).
 - Banco de dados SQLite local; não requer servidor de banco.
@@ -626,7 +650,7 @@ Levantados nesta sprint e implementados nas próximas:
 
 ---
 
-## 16. SEGURANÇA
+## 17. SEGURANÇA
 
 - Senhas com hash bcrypt (nunca texto puro).
 - Sessão mantida apenas em memória; não persiste em disco.
@@ -638,7 +662,7 @@ Levantados nesta sprint e implementados nas próximas:
 
 ---
 
-## 17. MÉTRICAS DE SUCESSO
+## 18. MÉTRICAS DE SUCESSO
 
 - Fluxo completo funcional: cadastrar produto → estoque → nota → caixa → dashboard.
 - Executável entregável rodando em Windows sem dependências extras.
@@ -649,7 +673,7 @@ Levantados nesta sprint e implementados nas próximas:
 
 ---
 
-## 18. RISCOS E MITIGAÇÕES
+## 19. RISCOS E MITIGAÇÕES
 
 | Risco | Probabilidade | Impacto | Mitigação |
 |---|---|---|---|
@@ -662,7 +686,7 @@ Levantados nesta sprint e implementados nas próximas:
 
 ---
 
-## 19. DEFINIÇÃO DE PRONTO (DoD Geral)
+## 20. DEFINIÇÃO DE PRONTO (DoD Geral)
 
 - [ ] Produto cadastra, estoque é controlado, caixa atualiza e dashboard exibe dados corretos.
 - [ ] Login funciona com RBAC aplicado em todos os módulos.
@@ -675,7 +699,7 @@ Levantados nesta sprint e implementados nas próximas:
 
 ---
 
-## 20. FUTURO DO PRODUTO
+## 21. FUTURO DO PRODUTO
 
 - Emissão oficial de NF-e / NF-Se com integração SEFAZ.
 - Versão web para acesso multi-dispositivo.

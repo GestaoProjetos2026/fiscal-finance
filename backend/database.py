@@ -79,8 +79,15 @@ def init_db():
             numero_nota TEXT NOT NULL UNIQUE,
             descricao TEXT NOT NULL,
             status TEXT NOT NULL DEFAULT 'rascunho',
+            pdf_url TEXT,
             data_criacao DATETIME DEFAULT CURRENT_TIMESTAMP
         )""")
+        
+        # Adicionar coluna pdf_url se ela não existir (para bancos legados)
+        cursor.execute("PRAGMA table_info(notas_fiscais)")
+        colunas = [col["name"] for col in cursor.fetchall()]
+        if "pdf_url" not in colunas:
+            cursor.execute("ALTER TABLE notas_fiscais ADD COLUMN pdf_url TEXT")
 
         cursor.execute("""
         CREATE TABLE IF NOT EXISTS itens_nota (
