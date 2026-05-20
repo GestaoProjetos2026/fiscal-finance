@@ -45,12 +45,19 @@ O token é obtido via `POST /v1/fisc/auth/login`.
 
 ## 🔐 AUTH — `/v1/fisc/auth`
 
-### `POST /v1/fisc/auth/login`
-Realiza o login e retorna um token JWT válido por 24h.
+### `POST /v1/fisc/oauth/token`
+Realiza o login via OAuth2 (Password Grant) e retorna um token JWT válido por 24h.
 
-**Body:**
-```json
-{ "email": "admin@fiscal.com", "senha": "admin123" }
+**Headers:**
+```
+Content-Type: application/x-www-form-urlencoded
+```
+
+**Body (Form-Data):**
+```
+grant_type=password
+username=admin@fiscal.com
+password=admin123
 ```
 
 **Resposta (`200`):**
@@ -58,15 +65,20 @@ Realiza o login e retorna um token JWT válido por 24h.
 {
   "status": "success",
   "data": {
-    "token": "Bearer eyJ...",
-    "id": 1,
-    "nome": "Administrador",
-    "papel": "admin",
-    "expira": "24h"
+    "access_token": "eyJ...",
+    "token_type": "Bearer",
+    "expires_in": 86400,
+    "user": {
+      "id": 1,
+      "nome": "Administrador",
+      "papel": "admin"
+    }
   },
-  "message": "Login realizado com sucesso."
+  "message": "Login OAuth2 realizado com sucesso."
 }
 ```
+
+> **Nota:** A rota legada `POST /v1/fisc/auth/login` foi descontinuada em favor do padrão OAuth2 (`/oauth/token`).
 
 ---
 
