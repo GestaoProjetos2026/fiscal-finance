@@ -45,6 +45,7 @@
         <span class="text-sm text-muted mt-4" id="nota-desc-label"></span>
       </div>
       <div class="flex-center gap-8">
+        <a id="btn-pdf-nota" target="_blank" class="btn btn-primary hidden" style="padding: 4px 12px; font-size: 12px; text-decoration: none;">📄 Baixar DANFE (PDF)</a>
         <span class="badge" id="nota-status-badge">—</span>
         <span class="text-sm text-muted" id="nota-data-label"></span>
       </div>
@@ -149,6 +150,14 @@
     statusBadge.textContent  = nota.status === 'emitida' ? '✅ Emitida' : nota.status;
     statusBadge.className    = `badge ${nota.status === 'emitida' ? 'badge-green' : 'badge-yellow'}`;
 
+    const pdfBtn = document.getElementById('btn-pdf-nota');
+    if (nota.pdf_url) {
+      pdfBtn.href = nota.pdf_url;
+      pdfBtn.classList.remove('hidden');
+    } else {
+      pdfBtn.classList.add('hidden');
+    }
+
     // Itens
     const tb = document.getElementById('tb-nota-itens');
     if (itens.length === 0) {
@@ -173,6 +182,14 @@
     document.getElementById('nota-total-final').textContent  = formatBRL(totais.total_final);
 
     document.getElementById('nota-resultado').classList.remove('hidden');
+  }
+
+  // Se houver um número de nota na URL (vindo de Caixa, por exemplo), buscar automaticamente
+  const urlParams = new URLSearchParams(window.location.search);
+  const numeroParam = urlParams.get('numero');
+  if (numeroParam) {
+    document.getElementById('input-num-nota').value = numeroParam;
+    buscarNota();
   }
 </script>
 

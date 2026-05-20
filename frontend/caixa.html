@@ -194,6 +194,12 @@
 
     tb.innerHTML = d.transacoes.map(t => {
       const entrada = t.tipo === 'entrada';
+      let btnNota = '';
+      if (t.descricao.includes('Receita NF')) {
+        const num = t.descricao.replace('Receita NF ', '').trim();
+        btnNota = `<a href="notas.html?numero=${num}" class="badge badge-gray" style="margin-left:8px; cursor:pointer; text-decoration:none;">📄 Ver Nota</a>`;
+      }
+
       return `
         <tr>
           <td class="text-muted">${formatDate(t.data_registro)}</td>
@@ -203,7 +209,7 @@
             </span>
           </td>
           <td><span class="badge badge-gray">${origemLabel[t.origem] || t.origem}</span></td>
-          <td>${t.descricao}</td>
+          <td>${t.descricao} ${btnNota}</td>
           <td style="text-align:right;font-weight:600;color:${entrada ? '#16a34a' : 'var(--danger)'};">
             ${entrada ? '+' : '-'} ${formatBRL(t.valor_liquido)}
           </td>

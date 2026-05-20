@@ -36,7 +36,10 @@ def calcular_intencao():
     skus_invalidos   = []
     total_bruto      = 0.0
     total_imposto    = 0.0
+    total_lucro      = 0.0
     total_final      = 0.0
+
+    markup = float(dados.get("markup", 0.0))
 
     for item in itens_req:
         sku = str(item.get("sku", "")).strip()
@@ -55,12 +58,19 @@ def calcular_intencao():
 
         p         = dict(produto)
         aliquota  = p.get("aliquota", p.get("aliquota_imposto", 0))
-        vb        = p["preco_base"] * qtd
+        
+        # Aplica o markup sobre o preço de custo para definir o preço de venda
+        preco_venda = p["preco_base"] * (1 + (markup / 100.0))
+        lucro_unitario = preco_venda - p["preco_base"]
+        
+        vb        = preco_venda * qtd
         vi        = vb * aliquota
         vt        = vb + vi
+        vl        = lucro_unitario * qtd
 
         total_bruto   += vb
         total_imposto += vi
+        total_lucro   += vl
         total_final   += vt
 
         itens_calculados.append({
@@ -71,6 +81,7 @@ def calcular_intencao():
             "aliquota":       aliquota,
             "valor_bruto":    round(vb, 2),
             "valor_imposto":  round(vi, 2),
+            "valor_lucro":    round(vl, 2),
             "valor_total":    round(vt, 2)
         })
 
@@ -85,6 +96,7 @@ def calcular_intencao():
             "totais": {
                 "total_bruto":    round(total_bruto,   2),
                 "total_imposto":  round(total_imposto, 2),
+                "total_lucro":    round(total_lucro, 2),
                 "total_final":    round(total_final,   2)
             }
         }, status_code=200)
@@ -122,6 +134,8 @@ def confirmar_nota():
         conn.close()
         return standard_response(success=False, message=f"Nota '{numero}' já existe.", data=None, status_code=409)
 
+    markup = float(dados.get("markup", 0.0))
+
     # Valida e calcula todos os itens
     itens_validos = []
     skus_invalidos = []
@@ -143,11 +157,15 @@ def confirmar_nota():
             return standard_response(success=False, message=f"Estoque insuficiente para SKU '{sku}'. Disponível: {estoque_atual}, necessário: {qtd}.", data=None, status_code=422)
 
         aliquota = p.get("aliquota", p.get("aliquota_imposto", 0))
-        vb = p["preco_base"] * qtd
+        
+        # Aplica o markup
+        preco_venda = p["preco_base"] * (1 + (markup / 100.0))
+        
+        vb = preco_venda * qtd
         vi = vb * aliquota
         vt = vb + vi
         itens_validos.append({**p, "quantidade": qtd, "aliquota": aliquota,
-                               "vb": vb, "vi": vi, "vt": vt})
+                               "vb": vb, "vi": vi, "vt": vt, "preco_venda": preco_venda})
 
     if skus_invalidos:
         conn.close()
@@ -157,10 +175,13 @@ def confirmar_nota():
     try:
         agora = datetime.now().isoformat()
 
+        # Como é um projeto acadêmico, geramos um DANFE simulado direto no frontend
+        dummy_pdf_url = f"danfe.html?numero={numero}"
+
         # 1. Cria a nota
         cursor.execute(
-            "INSERT INTO notas_fiscais (numero_nota, descricao, status, data_criacao) VALUES (?, ?, 'emitida', ?)",
-            (numero, descricao, agora)
+            "INSERT INTO notas_fiscais (numero_nota, descricao, status, pdf_url, data_criacao) VALUES (?, ?, 'emitida', ?, ?)",
+            (numero, descricao, dummy_pdf_url, agora)
         )
         nota_id = cursor.lastrowid
 
@@ -171,7 +192,7 @@ def confirmar_nota():
                 INSERT INTO itens_nota
                     (nota_id, sku, quantidade, preco_base, aliquota, valor_bruto, valor_imposto, valor_total)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-            """, (nota_id, item["sku"], item["quantidade"], item["preco_base"],
+            """, (nota_id, item["sku"], item["quantidade"], item["preco_venda"],
                   item["aliquota"], item["vb"], item["vi"], item["vt"]))
 
             # 3. Baixa o estoque
@@ -199,6 +220,7 @@ def confirmar_nota():
                 "nota_id":     nota_id,
                 "numero":      numero,
                 "status":      "emitida",
+                "pdf_url":     dummy_pdf_url,
                 "total_final": round(total_final, 2),
                 "itens":       len(itens_validos)
             }, status_code=201)

@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>DANFE - Documento Auxiliar da Nota Fiscal Eletrônica</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background: #525659;
+      /* Cor de fundo do visualizador de PDF */
+      display: flex;
+      justify-content: center;
+    }
+
+    .a4-page {
+      width: 210mm;
+      min-height: 297mm;
+      background: #fff;
+      padding: 10mm;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    }
+
+    .print-only {
+      display: none;
+    }
+
+    @media print {
+      body {
+        background: #fff;
+        padding: 0;
+      }
+
+      .a4-page {
+        box-shadow: none;
+        margin: 0;
+        padding: 0;
+        width: 100%;
+      }
+
+      .no-print {
+        display: none;
+      }
+
+      .print-only {
+        display: block;
+      }
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 16px;
+      margin: 0 0 10px 0;
+      font-weight: bold;
+      text-transform: uppercase;
+    }
+
+    .grid {
+      display: flex;
+      flex-wrap: wrap;
+      border-top: 1px solid #000;
+      border-left: 1px solid #000;
+    }
+
+    .box {
+      border-right: 1px solid #000;
+      border-bottom: 1px solid #000;
+      padding: 4px;
+    }
+
+    .box-title {
+      font-size: 8px;
+      text-transform: uppercase;
+      color: #333;
+      margin-bottom: 4px;
+    }
+
+    .box-value {
+      font-size: 12px;
+      font-weight: bold;
+    }
+
+    .w-100 {
+      width: 100%;
+    }
+
+    .w-50 {
+      width: 50%;
+    }
+
+    .w-33 {
+      width: 33.33%;
+    }
+
+    .w-25 {
+      width: 25%;
+    }
+
+    .w-15 {
+      width: 15%;
+    }
+
+    .w-85 {
+      width: 85%;
+    }
+
+    .text-center {
+      text-align: center;
+    }
+
+    .text-right {
+      text-align: right;
+    }
+
+    .section-title {
+      font-size: 10px;
+      font-weight: bold;
+      text-transform: uppercase;
+      margin: 15px 0 5px 0;
+    }
+
+    table.items {
+      width: 100%;
+      border-collapse: collapse;
+      border: 1px solid #000;
+      margin-top: 10px;
+    }
+
+    table.items th,
+    table.items td {
+      border: 1px solid #000;
+      padding: 4px;
+      font-size: 10px;
+    }
+
+    table.items th {
+      font-size: 9px;
+      text-transform: uppercase;
+      background: #f0f0f0;
+    }
+
+    .barcode {
+      width: 100%;
+      height: 40px;
+      background: repeating-linear-gradient(90deg,
+          #000,
+          #000 2px,
+          #fff 2px,
+          #fff 4px,
+          #000 4px,
+          #000 5px,
+          #fff 5px,
+          #fff 8px);
+      margin-top: 5px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- Barra de controles fixa no topo (não aparece na impressão) -->
+  <div class="no-print"
+    style="position: fixed; top: 10px; right: 20px; background: #fff; padding: 10px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); z-index: 100;">
+    <button onclick="window.print()"
+      style="padding: 10px 20px; font-size: 14px; font-weight: bold; background: #16a34a; color: #fff; border: none; border-radius: 4px; cursor: pointer;">🖨️
+      Imprimir / Salvar PDF</button>
+    <button onclick="window.close()"
+      style="padding: 10px 20px; font-size: 14px; margin-left: 10px; background: #4b5563; color: #fff; border: none; border-radius: 4px; cursor: pointer;">Voltar</button>
+  </div>
+
+  <div class="a4-page">
+    <div style="border: 1px solid #000; padding: 2px;">
+
+      <!-- Cabeçalho Principal -->
+      <div class="grid" style="border-top: none; border-left: none;">
+
+        <div class="box w-50" style="border-left: 1px solid #000; border-top: 1px solid #000; padding: 10px;">
+          <div style="font-weight: bold; font-size: 14px;">PROJETO ACADÊMICO LTDA</div>
+          <div style="font-size: 10px; margin-top: 5px;">
+            Av. Universitária, 1000 - Centro<br>
+            Campus Principal - Cidade Universitária<br>
+            CEP: 00000-000 - Fone: (00) 0000-0000
+          </div>
+        </div>
+
+        <div class="box w-15 text-center" style="border-top: 1px solid #000;">
+          <h1 style="margin-bottom: 2px;">DANFE</h1>
+          <div style="font-size: 10px;">Documento Auxiliar da Nota Fiscal Eletrônica</div>
+          <div style="font-size: 12px; margin-top: 5px;">
+            0 - Entrada<br>
+            <strong>1 - Saída</strong>
+          </div>
+          <div style="font-size: 14px; font-weight: bold; border: 1px solid #000; margin-top: 5px; padding: 2px;">
+            Nº <span id="danfe-numero">000.000.000</span>
+          </div>
+          <div style="font-size: 10px; margin-top: 2px;">SÉRIE: 1</div>
+        </div>
+
+        <div class="box w-33" style="border-top: 1px solid #000;">
+          <div class="box-title">CHAVE DE ACESSO (SIMULADA)</div>
+          <div class="barcode"></div>
+          <div class="box-value text-center"
+            style="font-size: 10px; font-family: monospace; letter-spacing: 1px; margin-top: 5px;" id="danfe-chave">
+            0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000
+          </div>
+        </div>
+      </div>
+
+      <!-- Natureza da Operação -->
+      <div class="grid" style="border-left: none;">
+        <div class="box w-50" style="border-left: 1px solid #000;">
+          <div class="box-title">NATUREZA DA OPERAÇÃO</div>
+          <div class="box-value">Venda de Mercadorias (Uso Acadêmico)</div>
+        </div>
+        <div class="box w-25">
+          <div class="box-title">PROTOCOLO DE AUTORIZAÇÃO DE USO</div>
+          <div class="box-value" id="danfe-protocolo">100000000000000 - 00/00/0000 00:00:00</div>
+        </div>
+        <div class="box w-25">
+          <div class="box-title">CNPJ</div>
+          <div class="box-value">00.000.000/0001-00</div>
+        </div>
+      </div>
+
+      <!-- Destinatário / Remetente -->
+      <div class="section-title">DESTINATÁRIO / REMETENTE</div>
+      <div class="grid">
+        <div class="box w-85">
+          <div class="box-title">NOME / RAZÃO SOCIAL</div>
+          <div class="box-value">Cliente Exemplo (Consumidor Final)</div>
+        </div>
+        <div class="box w-15">
+          <div class="box-title">DATA DA EMISSÃO</div>
+          <div class="box-value" id="danfe-data-emissao">00/00/0000</div>
+        </div>
+      </div>
+
+      <!-- Cálculos do Imposto -->
+      <div class="section-title">CÁLCULO DO IMPOSTO</div>
+      <div class="grid">
+        <div class="box w-25">
+          <div class="box-title">BASE DE CÁLCULO DO ICMS</div>
+          <div class="box-value text-right">0,00</div>
+        </div>
+        <div class="box w-25">
+          <div class="box-title">VALOR DO ICMS</div>
+          <div class="box-value text-right" id="danfe-v-imposto">0,00</div>
+        </div>
+        <div class="box w-25">
+          <div class="box-title">BASE DE CÁLC. ICMS ST</div>
+          <div class="box-value text-right">0,00</div>
+        </div>
+        <div class="box w-25">
+          <div class="box-title">VALOR DO ICMS SUBSTITUIÇÃO</div>
+          <div class="box-value text-right">0,00</div>
+        </div>
+      </div>
+      <div class="grid">
+        <div class="box w-25">
+          <div class="box-title">VALOR TOTAL DOS PRODUTOS</div>
+          <div class="box-value text-right" id="danfe-v-produtos">0,00</div>
+        </div>
+        <div class="box w-25">
+          <div class="box-title">VALOR DO FRETE</div>
+          <div class="box-value text-right">0,00</div>
+        </div>
+        <div class="box w-25">
+          <div class="box-title">OUTRAS DESPESAS ACESSÓRIAS</div>
+          <div class="box-value text-right">0,00</div>
+        </div>
+        <div class="box w-25">
+          <div class="box-title">VALOR TOTAL DA NOTA</div>
+          <div class="box-value text-right" id="danfe-v-total">0,00</div>
+        </div>
+      </div>
+
+      <!-- Dados dos Produtos/Serviços -->
+      <div class="section-title">DADOS DOS PRODUTOS / SERVIÇOS</div>
+      <table class="items">
+        <thead>
+          <tr>
+            <th>CÓDIGO</th>
+            <th>DESCRIÇÃO DO PRODUTO / SERVIÇO</th>
+            <th>NCM/SH</th>
+            <th>CSOSN</th>
+            <th>CFOP</th>
+            <th>UNID.</th>
+            <th>QTD.</th>
+            <th>V. UNIT.</th>
+            <th>V. TOTAL</th>
+            <th>BC ICMS</th>
+            <th>V. ICMS</th>
+            <th>ALÍQ. ICMS</th>
+          </tr>
+        </thead>
+        <tbody id="tb-danfe-itens">
+          <!-- Preenchido via JS -->
+        </tbody>
+      </table>
+
+      <!-- Dados Adicionais -->
+      <div class="section-title" style="margin-top: 30px;">DADOS ADICIONAIS</div>
+      <div class="grid">
+        <div class="box w-100" style="min-height: 80px;">
+          <div class="box-title">INFORMAÇÕES COMPLEMENTARES</div>
+          <div class="box-value" style="font-weight: normal; font-size: 10px;" id="danfe-obs">
+            DOCUMENTO SIMULADO PARA FINS ACADÊMICOS.<br>
+            Sem valor fiscal.
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script src="js/api.js"></script>
+  <script>
+    function formatBRL(valor) {
+      return Number(valor).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
+    function gerarChave() {
+      let chave = '';
+      for (let i = 0; i < 44; i++) { chave += Math.floor(Math.random() * 10); }
+      return chave.match(/.{1,4}/g).join(' ');
+    }
+
+    async function loadDanfe() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const numero = urlParams.get('numero');
+
+      if (!numero) {
+        alert("Número da nota não fornecido.");
+        return;
+      }
+
+      document.getElementById('danfe-numero').textContent = numero;
+      document.getElementById('danfe-chave').textContent = gerarChave();
+
+      try {
+        const res = await API.Notas.buscar(numero);
+        if (!res.ok) {
+          alert("Nota não encontrada!");
+          return;
+        }
+
+        const data = res.body.data;
+
+        // Formatar a data
+        const dataCriacao = new Date(data.nota.data_criacao);
+        document.getElementById('danfe-data-emissao').textContent = dataCriacao.toLocaleDateString('pt-BR');
+
+        // Protocolo
+        document.getElementById('danfe-protocolo').textContent = `135${Date.now()} - ${dataCriacao.toLocaleString('pt-BR')}`;
+
+        // Totais
+        document.getElementById('danfe-v-produtos').textContent = formatBRL(data.totais.total_final);
+        document.getElementById('danfe-v-total').textContent = formatBRL(data.totais.total_final);
+
+        // Calcular imposto total
+        let totalImposto = 0;
+        data.itens.forEach(i => totalImposto += i.valor_imposto);
+        document.getElementById('danfe-v-imposto').textContent = formatBRL(totalImposto);
+
+        // Itens
+        const tbody = document.getElementById('tb-danfe-itens');
+        tbody.innerHTML = data.itens.map(i => `
+          <tr>
+            <td class="text-center">${i.sku}</td>
+            <td>${i.nome || 'Produto'}</td>
+            <td class="text-center">99999999</td>
+            <td class="text-center">0102</td>
+            <td class="text-center">5102</td>
+            <td class="text-center">UN</td>
+            <td class="text-right">${i.quantidade}</td>
+            <td class="text-right">${formatBRL(i.preco_base)}</td>
+            <td class="text-right">${formatBRL(i.valor_bruto)}</td>
+            <td class="text-right">${formatBRL(i.valor_bruto)}</td>
+            <td class="text-right">${formatBRL(i.valor_imposto)}</td>
+            <td class="text-right">${(i.aliquota * 100).toFixed(2)}%</td>
+          </tr>
+        `).join('');
+
+        // Observação
+        const obsEl = document.getElementById('danfe-obs');
+        if (data.nota.descricao) {
+          obsEl.innerHTML += `<br><br><strong>Obs da Nota:</strong> ${data.nota.descricao}`;
+        }
+
+      } catch (err) {
+        console.error(err);
+        alert("Erro ao carregar os dados da nota.");
+      }
+    }
+
+    loadDanfe();
+  </script>
+</body>
+
+</html>

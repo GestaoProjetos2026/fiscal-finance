@@ -68,11 +68,17 @@
           Nenhum item adicionado ainda.
         </div>
 
-        <div class="flex-center gap-8 mt-16" style="justify-content:flex-end;">
-          <button class="btn btn-secondary" onclick="limparItens()">Limpar</button>
-          <button class="btn btn-primary" id="btn-calcular" onclick="calcularIntencao()">
-            Calcular Impostos
-          </button>
+        <div class="flex-center mt-16" style="justify-content:space-between; align-items:center;">
+          <div class="form-group" style="margin-bottom:0; max-width:140px;">
+            <label class="form-label" for="fisc-markup" style="font-weight:bold; color:var(--success);">📈 Markup (%)</label>
+            <input id="fisc-markup" type="number" step="1" value="30" class="form-control" />
+          </div>
+          <div class="flex-center gap-8">
+            <button class="btn btn-secondary" onclick="limparItens()">Limpar</button>
+            <button class="btn btn-primary" id="btn-calcular" onclick="calcularIntencao()">
+              Calcular c/ Lucro
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -117,6 +123,10 @@
               <span>Total Impostos</span>
               <span id="res-imposto" style="color:var(--danger);">—</span>
             </div>
+            <div class="totals-row">
+              <span>Lucro Bruto (Markup)</span>
+              <span id="res-lucro" style="color:var(--success); font-weight:600;">—</span>
+            </div>
             <div class="totals-row total-final">
               <span>Total Final da Nota</span>
               <span id="res-total">—</span>
@@ -144,6 +154,8 @@
       </div>
     </div>
   </div>
+
+
 </div>
 
 <script src="js/api.js"></script>
@@ -236,8 +248,10 @@
     const btn = document.getElementById('btn-calcular');
     setLoading(btn, true);
 
+    const markup = parseFloat(document.getElementById('fisc-markup').value) || 0;
     const res = await API.Notas.calcularIntencao(
-      itensAdicionados.map(i => ({ sku: i.sku, quantidade: i.quantidade }))
+      itensAdicionados.map(i => ({ sku: i.sku, quantidade: i.quantidade })),
+      markup
     );
 
     setLoading(btn, false);
@@ -266,6 +280,7 @@
     const t = ultimoCalculo.totais;
     document.getElementById('res-bruto').textContent   = formatBRL(t.total_bruto);
     document.getElementById('res-imposto').textContent = formatBRL(t.total_imposto);
+    document.getElementById('res-lucro').textContent   = formatBRL(t.total_lucro || 0);
     document.getElementById('res-total').textContent   = formatBRL(t.total_final);
 
     const tbRes = document.getElementById('tb-resultado-itens');
@@ -280,6 +295,8 @@
 
     document.getElementById('resultado-vazio').style.display = 'none';
     document.getElementById('resultado-dados').classList.remove('hidden');
+
+
 
     toast('Cálculo realizado. Confira os valores e confirme a nota.', 'success');
   }
@@ -298,9 +315,11 @@
     const btn = document.getElementById('btn-confirmar-nota');
     setLoading(btn, true);
 
+    const markup = parseFloat(document.getElementById('fisc-markup').value) || 0;
     const res = await API.Notas.confirmar(
       numero, descricao || 'Nota emitida via sistema web',
-      itensAdicionados.map(i => ({ sku: i.sku, quantidade: i.quantidade }))
+      itensAdicionados.map(i => ({ sku: i.sku, quantidade: i.quantidade })),
+      markup
     );
 
     setLoading(btn, false);
@@ -314,6 +333,7 @@
       toast(res.body.message, 'error');
     }
   }
+
 </script>
 
 </body>
