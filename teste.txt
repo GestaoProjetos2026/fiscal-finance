@@ -1,0 +1,6 @@
+Teste de login ✔
+Teste de criação de produto ✔
+Teste de entrada de estoque ✔
+Teste de geração de nota fiscal ✔
+Teste de confirmação de nota ✔
+Teste de atualização do caixa ✔
