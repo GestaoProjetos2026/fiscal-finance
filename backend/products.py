@@ -1,5 +1,6 @@
 # src/products.py
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request
+from utils import standard_response
 from database import get_connection
 
 # Um Blueprint é como uma "seção" da API, agrupa rotas relacionadas
@@ -40,11 +41,7 @@ def listar_produtos():
 
     lista = [dict(p) for p in produtos]
 
-    return jsonify({
-        "status": "success",
-        "data": lista,
-        "message": f"{len(lista)} produto(s) encontrado(s)"
-    }), 200
+    return standard_response(success=True, message=f"{len(lista)} produto(s) encontrado(s)", data=lista, status_code=200)
 
 
 # ─────────────────────────────────────────────────────────
@@ -73,17 +70,9 @@ def buscar_produto(sku):
     conn.close()
 
     if produto is None:
-        return jsonify({
-            "status": "error",
-            "data": None,
-            "message": f"Produto com SKU '{sku}' não encontrado."
-        }), 404
+        return standard_response(success=False, message=f"Produto com SKU '{sku}' não encontrado.", data=None, status_code=404)
 
-    return jsonify({
-        "status": "success",
-        "data": dict(produto),
-        "message": "Produto encontrado."
-    }), 200
+    return standard_response(success=True, message="Produto encontrado.", data=dict(produto), status_code=200)
 
 
 # ─────────────────────────────────────────────────────────
@@ -105,11 +94,7 @@ def criar_produto():
 
     # Validação 1: verificar se o corpo veio correto
     if not dados:
-        return jsonify({
-            "status": "error",
-            "data": None,
-            "message": "Corpo da requisição inválido. Envie um JSON válido."
-        }), 400
+        return standard_response(success=False, message="Corpo da requisição inválido. Envie um JSON válido.", data=None, status_code=400)
 
     sku      = dados.get("sku",              "").strip()
     nome     = dados.get("nome",             "").strip()
@@ -120,17 +105,13 @@ def criar_produto():
 
     # Validação 2: campos obrigatórios e regras de negócio
     if not sku:
-        return jsonify({"status": "error", "data": None,
-                        "message": "Campo 'sku' é obrigatório."}), 400
+        return standard_response(success=False, message="Campo 'sku' é obrigatório.", data=None, status_code=400)
     if not nome:
-        return jsonify({"status": "error", "data": None,
-                        "message": "Campo 'nome' é obrigatório."}), 400
+        return standard_response(success=False, message="Campo 'nome' é obrigatório.", data=None, status_code=400)
     if preco is None or preco <= 0:
-        return jsonify({"status": "error", "data": None,
-                        "message": "Campo 'preco_base' deve ser maior que 0."}), 400
+        return standard_response(success=False, message="Campo 'preco_base' deve ser maior que 0.", data=None, status_code=400)
     if aliquota is None or not (0 <= aliquota <= 1):
-        return jsonify({"status": "error", "data": None,
-                        "message": "Campo 'aliquota_imposto' deve ser entre 0 e 1."}), 400
+        return standard_response(success=False, message="Campo 'aliquota_imposto' deve ser entre 0 e 1.", data=None, status_code=400)
 
     conn = get_connection()
     cursor = conn.cursor()
@@ -139,11 +120,7 @@ def criar_produto():
     cursor.execute("SELECT sku FROM produtos WHERE sku = ?", (sku,))
     if cursor.fetchone():
         conn.close()
-        return jsonify({
-            "status": "error",
-            "data": None,
-            "message": f"Produto com SKU '{sku}' já existe. O SKU deve ser único."
-        }), 409
+        return standard_response(success=False, message=f"Produto com SKU '{sku}' já existe. O SKU deve ser único.", data=None, status_code=409)
 
     # Tudo válido: salvar no banco
     cursor.execute(
@@ -153,16 +130,12 @@ def criar_produto():
     conn.commit()
     conn.close()
 
-    return jsonify({
-        "status": "success",
-        "data": {
+    return standard_response(success=True, message="Produto criado com sucesso.", data={
             "sku": sku,
             "nome": nome,
             "preco_base": preco,
             "aliquota_imposto": aliquota   # devolve com nome do frontend
-        },
-        "message": "Produto criado com sucesso."
-    }), 201
+        }, status_code=201)
 
 
 # ─────────────────────────────────────────────────────────
@@ -189,20 +162,12 @@ def editar_produto(sku):
 
     if produto_atual is None:
         conn.close()
-        return jsonify({
-            "status": "error",
-            "data": None,
-            "message": f"Produto com SKU '{sku}' não encontrado."
-        }), 404
+        return standard_response(success=False, message=f"Produto com SKU '{sku}' não encontrado.", data=None, status_code=404)
 
     dados = request.get_json()
     if not dados:
         conn.close()
-        return jsonify({
-            "status": "error",
-            "data": None,
-            "message": "Corpo da requisição inválido ou vazio."
-        }), 400
+        return standard_response(success=False, message="Corpo da requisição inválido ou vazio.", data=None, status_code=400)
 
     # Mantém o valor atual se o campo não foi enviado
     produto_dict  = dict(produto_atual)
@@ -214,16 +179,13 @@ def editar_produto(sku):
     # Validações nos novos valores
     if not novo_nome:
         conn.close()
-        return jsonify({"status": "error", "data": None,
-                        "message": "Campo 'nome' não pode ser vazio."}), 400
+        return standard_response(success=False, message="Campo 'nome' não pode ser vazio.", data=None, status_code=400)
     if novo_preco <= 0:
         conn.close()
-        return jsonify({"status": "error", "data": None,
-                        "message": "Campo 'preco_base' deve ser maior que 0."}), 400
+        return standard_response(success=False, message="Campo 'preco_base' deve ser maior que 0.", data=None, status_code=400)
     if not (0 <= nova_aliquota <= 1):
         conn.close()
-        return jsonify({"status": "error", "data": None,
-                        "message": "Campo 'aliquota_imposto' deve ser entre 0 e 1."}), 400
+        return standard_response(success=False, message="Campo 'aliquota_imposto' deve ser entre 0 e 1.", data=None, status_code=400)
 
     cursor.execute(
         "UPDATE produtos SET nome = ?, preco_base = ?, aliquota = ? WHERE sku = ?",
@@ -232,16 +194,12 @@ def editar_produto(sku):
     conn.commit()
     conn.close()
 
-    return jsonify({
-        "status": "success",
-        "data": {
+    return standard_response(success=True, message="Produto atualizado com sucesso.", data={
             "sku": sku,
             "nome": novo_nome,
             "preco_base": novo_preco,
             "aliquota_imposto": nova_aliquota   # devolve com nome do frontend
-        },
-        "message": "Produto atualizado com sucesso."
-    }), 200
+        }, status_code=200)
 
 
 # ─────────────────────────────────────────────────────────
@@ -261,11 +219,7 @@ def remover_produto(sku):
     cursor.execute("SELECT sku FROM produtos WHERE sku = ?", (sku,))
     if cursor.fetchone() is None:
         conn.close()
-        return jsonify({
-            "status": "error",
-            "data": None,
-            "message": f"Produto com SKU '{sku}' não encontrado."
-        }), 404
+        return standard_response(success=False, message=f"Produto com SKU '{sku}' não encontrado.", data=None, status_code=404)
 
     # Verificar se tem movimentações de estoque vinculadas
     cursor.execute("SELECT COUNT(*) FROM estoque WHERE sku = ?", (sku,))
@@ -273,22 +227,14 @@ def remover_produto(sku):
 
     if total_movimentacoes > 0:
         conn.close()
-        return jsonify({
-            "status": "error",
-            "data": {"movimentacoes_vinculadas": total_movimentacoes},
-            "message": (
+        return standard_response(success=False, message=(
                 f"Não é possível remover: produto possui "
                 f"{total_movimentacoes} movimentação(ões) de estoque vinculada(s)."
-            )
-        }), 409
+            ), data={"movimentacoes_vinculadas": total_movimentacoes}, status_code=409)
 
     # Tudo ok, remover
     cursor.execute("DELETE FROM produtos WHERE sku = ?", (sku,))
     conn.commit()
     conn.close()
 
-    return jsonify({
-        "status": "success",
-        "data": None,
-        "message": f"Produto '{sku}' removido com sucesso."
-    }), 200
+    return standard_response(success=True, message=f"Produto '{sku}' removido com sucesso.", data=None, status_code=200)

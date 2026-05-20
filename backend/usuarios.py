@@ -1,5 +1,6 @@
-import hashlib
-from flask import Blueprint, request, jsonify, g
+import bcrypt
+from flask import Blueprint, request
+from utils import standard_response, g
 from database import get_connection
 from auth import requer_auth
 
@@ -11,10 +12,7 @@ def apenas_admin(f):
     @wraps(f)
     def wrapper(*args, **kwargs):
         if not hasattr(g, 'usuario') or g.usuario.get('papel') != 'admin':
-            return jsonify({
-                "status": "error", "data": None,
-                "message": "Acesso negado. Apenas administradores podem gerenciar usuários."
-            }), 403
+            return standard_response(success=False, message="Acesso negado. Apenas administradores podem gerenciar usuários.", data=None, status_code=403)
         return f(*args, **kwargs)
     return wrapper
 
@@ -30,11 +28,7 @@ def listar_usuarios():
     conn.close()
     
     lista = [dict(r) for r in rows]
-    return jsonify({
-        "status": "success",
-        "data": lista,
-        "message": "Lista de usuários."
-    }), 200
+    return standard_response(success=True, message="Lista de usuários.", data=lista, status_code=200)
 
 @usuarios_bp.route("/usuarios", methods=["POST"])
 @requer_auth
@@ -43,7 +37,7 @@ def criar_usuario():
     """Cria um novo usuário."""
     dados = request.get_json()
     if not dados:
-        return jsonify({"status": "error", "data": None, "message": "Corpo inválido."}), 400
+        return standard_response(success=False, message="Corpo inválido.", data=None, status_code=400)
         
     nome = dados.get("nome", "").strip()
     email = dados.get("email", "").strip().lower()
@@ -51,9 +45,9 @@ def criar_usuario():
     papel = dados.get("papel", "usuario")
     
     if not nome or not email or not senha:
-        return jsonify({"status": "error", "data": None, "message": "Nome, email e senha são obrigatórios."}), 400
+        return standard_response(success=False, message="Nome, email e senha são obrigatórios.", data=None, status_code=400)
         
-    senha_hash = hashlib.sha256(senha.encode()).hexdigest()
+    senha_hash = bcrypt.hashpw(senha.encode(), bcrypt.gensalt()).decode('utf-8')
     
     conn = get_connection()
     cursor = conn.cursor()
@@ -66,15 +60,11 @@ def criar_usuario():
         novo_id = cursor.lastrowid
     except Exception as e:
         conn.close()
-        return jsonify({"status": "error", "data": None, "message": f"Erro ao criar usuário: {str(e)}"}), 500
+        return standard_response(success=False, message=f"Erro ao criar usuário: {str(e)}", data=None, status_code=500)
     finally:
         conn.close()
         
-    return jsonify({
-        "status": "success",
-        "data": {"id": novo_id},
-        "message": "Usuário criado com sucesso."
-    }), 201
+    return standard_response(success=True, message="Usuário criado com sucesso.", data={"id": novo_id}, status_code=201)
 
 @usuarios_bp.route("/usuarios/<int:usuario_id>/role", methods=["PUT"])
 @requer_auth
@@ -85,7 +75,7 @@ def editar_papel(usuario_id):
     novo_papel = dados.get("papel", "").strip() if dados else ""
     
     if not novo_papel:
-        return jsonify({"status": "error", "data": None, "message": "O papel é obrigatório."}), 400
+        return standard_response(success=False, message="O papel é obrigatório.", data=None, status_code=400)
         
     conn = get_connection()
     cursor = conn.cursor()
@@ -93,16 +83,12 @@ def editar_papel(usuario_id):
     
     if cursor.rowcount == 0:
         conn.close()
-        return jsonify({"status": "error", "data": None, "message": "Usuário não encontrado."}), 404
+        return standard_response(success=False, message="Usuário não encontrado.", data=None, status_code=404)
         
     conn.commit()
     conn.close()
     
-    return jsonify({
-        "status": "success",
-        "data": None,
-        "message": "Papel do usuário atualizado com sucesso."
-    }), 200
+    return standard_response(success=True, message="Papel do usuário atualizado com sucesso.", data=None, status_code=200)
 
 @usuarios_bp.route("/usuarios/<int:usuario_id>", methods=["DELETE"])
 @requer_auth
@@ -111,7 +97,7 @@ def excluir_usuario(usuario_id):
     """Exclui um usuário do sistema."""
     # Impede auto-exclusão
     if g.usuario.get("id") == usuario_id:
-        return jsonify({"status": "error", "data": None, "message": "Você não pode excluir sua própria conta."}), 400
+        return standard_response(success=False, message="Você não pode excluir sua própria conta.", data=None, status_code=400)
         
     conn = get_connection()
     cursor = conn.cursor()
@@ -119,13 +105,9 @@ def excluir_usuario(usuario_id):
     
     if cursor.rowcount == 0:
         conn.close()
-        return jsonify({"status": "error", "data": None, "message": "Usuário não encontrado."}), 404
+        return standard_response(success=False, message="Usuário não encontrado.", data=None, status_code=404)
         
     conn.commit()
     conn.close()
     
-    return jsonify({
-        "status": "success",
-        "data": None,
-        "message": "Usuário excluído com sucesso."
-    }), 200
+    return standard_response(success=True, message="Usuário excluído com sucesso.", data=None, status_code=200)

@@ -9,7 +9,8 @@
 # GET /v1/public/fisc/stock/<sku>          → Saldo de estoque por SKU
 # GET /v1/public/fisc/cashflow/summary     → Resumo financeiro geral
 
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request
+from utils import standard_response
 from database import get_connection
 
 public_bp = Blueprint("public", __name__)
@@ -31,11 +32,7 @@ def _validar_api_key() -> bool:
 
 
 def _erro_nao_autorizado():
-    return jsonify({
-        "status": "error",
-        "data": None,
-        "message": "Acesso negado. Informe uma API Key válida no header X-API-KEY."
-    }), 403
+    return standard_response(success=False, message="Acesso negado. Informe uma API Key válida no header X-API-KEY.", data=None, status_code=403)
 
 
 # ────────────────────────────────────────────────────────────────
@@ -85,17 +82,9 @@ def produto_publico(sku):
     conn.close()
 
     if not produto:
-        return jsonify({
-            "status": "error",
-            "data": None,
-            "message": f"Produto com SKU '{sku}' não encontrado."
-        }), 404
+        return standard_response(success=False, message=f"Produto com SKU '{sku}' não encontrado.", data=None, status_code=404)
 
-    return jsonify({
-        "status": "success",
-        "data": dict(produto),
-        "message": "Produto encontrado."
-    }), 200
+    return standard_response(success=True, message="Produto encontrado.", data=dict(produto), status_code=200)
 
 
 # ────────────────────────────────────────────────────────────────
@@ -132,11 +121,7 @@ def estoque_publico(sku):
 
     if not produto:
         conn.close()
-        return jsonify({
-            "status": "error",
-            "data": None,
-            "message": f"Produto com SKU '{sku}' não encontrado."
-        }), 404
+        return standard_response(success=False, message=f"Produto com SKU '{sku}' não encontrado.", data=None, status_code=404)
 
     # Calcula saldo
     cursor.execute("""
@@ -149,16 +134,12 @@ def estoque_publico(sku):
     estoque = cursor.fetchone()
     conn.close()
 
-    return jsonify({
-        "status": "success",
-        "data": {
+    return standard_response(success=True, message="Saldo de estoque consultado.", data={
             "sku":                 produto["sku"],
             "nome":                produto["nome"],
             "saldo_atual":         estoque["saldo_atual"] if estoque else 0,
             "ultima_movimentacao": estoque["ultima_movimentacao"] if estoque else None
-        },
-        "message": "Saldo de estoque consultado."
-    }), 200
+        }, status_code=200)
 
 
 # ────────────────────────────────────────────────────────────────
@@ -224,16 +205,12 @@ def resumo_caixa_publico():
     total_despesas  = custo_compras + desp_manuais
     saldo_atual     = total_entradas - total_despesas
 
-    return jsonify({
-        "status": "success",
-        "data": {
+    return standard_response(success=True, message="Resumo financeiro gerado.", data={
             "saldo_atual":     round(saldo_atual,    2),
             "total_entradas":  round(total_entradas, 2),
             "total_despesas":  round(total_despesas, 2),
             "total_impostos":  round(total_impostos, 2)
-        },
-        "message": "Resumo financeiro gerado."
-    }), 200
+        }, status_code=200)
 # ────────────────────────────────────────────────────────────────
 # GET /v1/public/fisc/history/<string:sku>
 # FISC-MOD1-03 — Retorna histórico de movimentações para Service Desk
@@ -256,11 +233,7 @@ def historico_publico(sku):
 
     if not produto:
         conn.close()
-        return jsonify({
-            "status": "error",
-            "data": None,
-            "message": f"Produto com SKU '{sku}' não encontrado."
-        }), 404
+        return standard_response(success=False, message=f"Produto com SKU '{sku}' não encontrado.", data=None, status_code=404)
 
     # Busca todas as movimentações (entrada e saída)
     cursor.execute("""
@@ -273,12 +246,8 @@ def historico_publico(sku):
     historico = [dict(row) for row in cursor.fetchall()]
     conn.close()
 
-    return jsonify({
-        "status": "success",
-        "data": {
+    return standard_response(success=True, message="Histórico de movimentações consultado com sucesso.", data={
             "sku": produto["sku"],
             "nome": produto["nome"],
             "historico": historico
-        },
-        "message": "Histórico de movimentações consultado com sucesso."
-    }), 200
+        }, status_code=200)

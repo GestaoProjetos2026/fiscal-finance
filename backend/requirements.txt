@@ -7,3 +7,4 @@ PyJWT>=2.8.0
 flasgger>=0.9.7
 flask-cors>=4.0.0
 python-dotenv>=1.0.0
+bcrypt>=4.0.0

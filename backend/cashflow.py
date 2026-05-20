@@ -9,7 +9,8 @@
 # já insere uma linha em `caixa` ao confirmar a nota, e o código antigo também
 # recalculava receita via estoque_mov (contando duas vezes a mesma venda).
 
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request
+from utils import standard_response
 from database import get_connection
 from datetime import datetime
 
@@ -59,9 +60,7 @@ def consultar_saldo():
     total_despesas = despesas_manuais + custo_compras
     saldo = total_entradas - total_despesas
 
-    return jsonify({
-        "status": "success",
-        "data": {
+    return standard_response(success=True, message="Saldo calculado com sucesso.", data={
             "total_entradas":  round(total_entradas,  2),
             "total_despesas":  round(total_despesas,  2),
             "saldo_liquido":   round(saldo,            2),
@@ -70,9 +69,7 @@ def consultar_saldo():
                 "despesas_manuais": round(despesas_manuais, 2),
                 "custo_compras":    round(custo_compras,    2)
             }
-        },
-        "message": "Saldo calculado com sucesso."
-    }), 200
+        }, status_code=200)
 
 
 # ─────────────────────────────────────────────────────────
@@ -86,27 +83,23 @@ def registrar_despesa():
     """
     dados = request.get_json()
     if not dados:
-        return jsonify({"status": "error", "data": None,
-                        "message": "Corpo da requisição inválido."}), 400
+        return standard_response(success=False, message="Corpo da requisição inválido.", data=None, status_code=400)
 
     descricao = dados.get("descricao", "").strip()
     valor     = dados.get("valor")
     data      = dados.get("data")  # opcional
 
     if not descricao:
-        return jsonify({"status": "error", "data": None,
-                        "message": "Campo 'descricao' é obrigatório."}), 400
+        return standard_response(success=False, message="Campo 'descricao' é obrigatório.", data=None, status_code=400)
     if valor is None or valor <= 0:
-        return jsonify({"status": "error", "data": None,
-                        "message": "Campo 'valor' deve ser maior que 0."}), 400
+        return standard_response(success=False, message="Campo 'valor' deve ser maior que 0.", data=None, status_code=400)
 
     # Valida data se fornecida
     if data:
         try:
             datetime.strptime(data, "%Y-%m-%d")
         except ValueError:
-            return jsonify({"status": "error", "data": None,
-                            "message": "Campo 'data' deve estar no formato YYYY-MM-DD."}), 400
+            return standard_response(success=False, message="Campo 'data' deve estar no formato YYYY-MM-DD.", data=None, status_code=400)
 
     conn = get_connection()
     cursor = conn.cursor()
@@ -126,17 +119,13 @@ def registrar_despesa():
     novo_id = cursor.lastrowid
     conn.close()
 
-    return jsonify({
-        "status": "success",
-        "data": {
+    return standard_response(success=True, message="Despesa registrada com sucesso.", data={
             "id":        novo_id,
             "tipo":      "despesa",
             "descricao": descricao,
             "valor":     valor,
             "data":      data or datetime.now().strftime("%Y-%m-%d")
-        },
-        "message": "Despesa registrada com sucesso."
-    }), 201
+        }, status_code=201)
 
 
 # ─────────────────────────────────────────────────────────
@@ -153,15 +142,13 @@ def extrato_periodo():
     data_fim    = request.args.get("to")
 
     if not data_inicio or not data_fim:
-        return jsonify({"status": "error", "data": None,
-                        "message": "Parâmetros 'from' e 'to' são obrigatórios. Ex: ?from=2026-01-01&to=2026-12-31"}), 400
+        return standard_response(success=False, message="Parâmetros 'from' e 'to' são obrigatórios. Ex: ?from=2026-01-01&to=2026-12-31", data=None, status_code=400)
 
     try:
         datetime.strptime(data_inicio, "%Y-%m-%d")
         datetime.strptime(data_fim,    "%Y-%m-%d")
     except ValueError:
-        return jsonify({"status": "error", "data": None,
-                        "message": "Datas devem estar no formato YYYY-MM-DD."}), 400
+        return standard_response(success=False, message="Datas devem estar no formato YYYY-MM-DD.", data=None, status_code=400)
 
     conn = get_connection()
     cursor = conn.cursor()
@@ -205,14 +192,10 @@ def extrato_periodo():
         else:
             total_despesas += r["valor_liquido"]
 
-    return jsonify({
-        "status": "success",
-        "data": {
+    return standard_response(success=True, message=f"{len(transacoes)} transação(ões) encontrada(s) no período.", data={
             "periodo":           {"from": data_inicio, "to": data_fim},
             "subtotal_entradas": round(total_entradas, 2),
             "subtotal_despesas": round(total_despesas, 2),
             "saldo_periodo":     round(total_entradas - total_despesas, 2),
             "transacoes":        transacoes
-        },
-        "message": f"{len(transacoes)} transação(ões) encontrada(s) no período."
-    }), 200
+        }, status_code=200)

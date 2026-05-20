@@ -66,10 +66,27 @@ async function apiFetch(path, options = {}) {
 
 // ─── AUTH ─────────────────────────────────────────────────────
 const Auth = {
+  // LOGIN ANTIGO (Desativado)
+  // async login(email, senha) {
+  //   return apiFetch('/auth/login', {
+  //     method: 'POST',
+  //     body: JSON.stringify({ email, senha })
+  //   });
+  // },
+  
+  // LOGIN OAUTH2 (Novo)
   async login(email, senha) {
-    return apiFetch('/auth/login', {
+    const params = new URLSearchParams();
+    params.append('grant_type', 'password');
+    params.append('username', email);
+    params.append('password', senha);
+
+    return apiFetch('/oauth/token', {
       method: 'POST',
-      body: JSON.stringify({ email, senha })
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'
+      },
+      body: params.toString()
     });
   },
   async logout() {

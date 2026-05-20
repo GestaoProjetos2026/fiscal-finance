@@ -1,0 +1,61 @@
+{
+    "info": {
+        "name": "Fiscal Finance API",
+        "description": "Coleção de API para o Squad FISC (Gestão Fiscal) - Padrão GestaoProjetos2026",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "item": [
+        {
+            "name": "Autenticação",
+            "item": [
+                {
+                    "name": "Login (OAuth2 Password Grant)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            { "key": "Content-Type", "value": "application/x-www-form-urlencoded" }
+                        ],
+                        "body": {
+                            "mode": "urlencoded",
+                            "urlencoded": [
+                                { "key": "grant_type", "value": "password", "type": "text" },
+                                { "key": "username", "value": "admin@fiscal.com", "type": "text" },
+                                { "key": "password", "value": "admin123", "type": "text" }
+                            ]
+                        },
+                        "url": { "raw": "{{base_url}}/v1/fisc/oauth/token", "host": ["{{base_url}}"], "path": ["v1", "fisc", "oauth", "token"] }
+                    }
+                },
+                {
+                    "name": "Meu Perfil",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            { "key": "Authorization", "value": "Bearer {{access_token}}" }
+                        ],
+                        "url": { "raw": "{{base_url}}/v1/fisc/auth/me", "host": ["{{base_url}}"], "path": ["v1", "fisc", "auth", "me"] }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Produtos",
+            "item": [
+                {
+                    "name": "Listar Produtos",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            { "key": "Authorization", "value": "Bearer {{access_token}}" }
+                        ],
+                        "url": { "raw": "{{base_url}}/v1/fisc/products", "host": ["{{base_url}}"], "path": ["v1", "fisc", "products"] }
+                    }
+                }
+            ]
+        }
+    ],
+    "variable": [
+        { "key": "base_url", "value": "http://localhost:5000" },
+        { "key": "access_token", "value": "" }
+    ]
+}

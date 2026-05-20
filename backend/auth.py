@@ -10,8 +10,10 @@
 
 import hashlib
 import datetime
-from flask import Blueprint, request, jsonify, g
+from flask import Blueprint, request, g
 import jwt
+import bcrypt
+from utils import standard_response
 
 from database import get_connection
 
@@ -39,12 +41,24 @@ def init_db_auth():
         )
     """)
 
-    # Seed: admin inicial
-    senha_hash = hashlib.sha256("admin123".encode()).hexdigest()
+    # Seed legado (comentado a pedido do usuário - conflito com bcrypt)
+    # senha_hash_old = hashlib.sha256("admin123".encode()).hexdigest()
+    # cursor.execute("""
+    #     INSERT OR IGNORE INTO usuarios (nome, email, senha_hash, papel)
+    #     VALUES (?, ?, ?, ?)
+    # """, ("Administrador", "admin@fiscal.com", senha_hash_old, "admin"))
+
+    # Novo seed: admin inicial com bcrypt
+    senha_hash_bcrypt = bcrypt.hashpw("admin123".encode(), bcrypt.gensalt()).decode('utf-8')
+    
+    # Inserir se não existir
     cursor.execute("""
         INSERT OR IGNORE INTO usuarios (nome, email, senha_hash, papel)
         VALUES (?, ?, ?, ?)
-    """, ("Administrador", "admin@fiscal.com", senha_hash, "admin"))
+    """, ("Administrador", "admin@fiscal.com", senha_hash_bcrypt, "admin"))
+
+    # Forçar a atualização da senha caso o banco antigo já exista (para não quebrar o login)
+    cursor.execute("UPDATE usuarios SET senha_hash = ? WHERE email = 'admin@fiscal.com'", (senha_hash_bcrypt,))
 
     conn.commit()
     conn.close()
@@ -78,63 +92,83 @@ def requer_auth(f):
     def wrapper(*args, **kwargs):
         payload = validar_token(request.headers.get("Authorization", ""))
         if not payload:
-            return jsonify({
-                "status": "error", "data": None,
-                "message": "Não autorizado. Faça login e use o header Authorization: Bearer <token>."
-            }), 401
+            return standard_response(
+                success=False,
+                message="Não autorizado. Faça login e use o header Authorization: Bearer <token>.",
+                data=None,
+                status_code=401
+            )
         g.usuario = payload   # disponível para a rota
         return f(*args, **kwargs)
     return wrapper
 
 
-# ── FISC-12 — POST /auth/login ───────────────────────────────────
-@auth_bp.route("/auth/login", methods=["POST"])
-def login():
+# ── Rota Legada (FISC-12) ────────────────────────────────────────
+# @auth_bp.route("/auth/login", methods=["POST"])
+# def login():
+#     """ Rota de login antiga baseada em SHA-256 e JSON no body. Desativada para usar OAuth2. """
+#     pass
+
+# ── Rota OAuth2 (Password Grant) ─────────────────────────────────
+@auth_bp.route("/oauth/token", methods=["POST"])
+def oauth_token():
     """
-    Realiza o login e retorna um token JWT.
-    Body: { "email": "admin@fiscal.com", "senha": "admin123" }
+    Realiza o login e retorna um token JWT (Padrão OAuth 2.0).
+    Espera formato application/x-www-form-urlencoded
+    Campos: grant_type=password, username=..., password=...
     """
-    dados = request.get_json()
-    if not dados:
-        return jsonify({"status": "error", "data": None,
-                        "message": "Corpo da requisição inválido."}), 400
+    grant_type = request.form.get("grant_type")
+    username = request.form.get("username", "").strip().lower()
+    password = request.form.get("password", "")
 
-    email = str(dados.get("email", "")).strip().lower()
-    senha = str(dados.get("senha", ""))
+    if grant_type != "password":
+        return standard_response(success=False, message="grant_type deve ser 'password'.", data=None, status_code=400)
 
-    if not email or not senha:
-        return jsonify({"status": "error", "data": None,
-                        "message": "Campos 'email' e 'senha' são obrigatórios."}), 400
-
-    senha_hash = hashlib.sha256(senha.encode()).hexdigest()
+    if not username or not password:
+        return standard_response(success=False, message="Campos 'username' e 'password' são obrigatórios.", data=None, status_code=400)
 
     conn = get_connection()
     cursor = conn.cursor()
     cursor.execute(
-        "SELECT id, nome, papel FROM usuarios WHERE email = ? AND senha_hash = ?",
-        (email, senha_hash)
+        "SELECT id, nome, papel, senha_hash FROM usuarios WHERE email = ?",
+        (username,)
     )
     usuario = cursor.fetchone()
     conn.close()
 
     if not usuario:
-        return jsonify({"status": "error", "data": None,
-                        "message": "Credenciais inválidas."}), 401
+        return standard_response(success=False, message="Credenciais inválidas.", data=None, status_code=401)
 
     u = dict(usuario)
+    
+    # Verifica a senha com bcrypt
+    senha_valida = False
+    try:
+        senha_valida = bcrypt.checkpw(password.encode(), u["senha_hash"].encode('utf-8'))
+    except ValueError:
+        # Fallback caso a senha do banco não seja um hash bcrypt válido
+        senha_valida = False
+
+    if not senha_valida:
+        return standard_response(success=False, message="Credenciais inválidas.", data=None, status_code=401)
+
     token = gerar_token(u["id"], u["papel"])
 
-    return jsonify({
-        "status": "success",
-        "data": {
-            "token":  f"Bearer {token}",
-            "id":     u["id"],
-            "nome":   u["nome"],
-            "papel":  u["papel"],
-            "expira": "24h"
+    return standard_response(
+        success=True,
+        message="Login OAuth2 realizado com sucesso.",
+        data={
+            "access_token": token,
+            "token_type": "Bearer",
+            "expires_in": 86400,
+            "user": {
+                "id": u["id"],
+                "nome": u["nome"],
+                "papel": u["papel"]
+            }
         },
-        "message": "Login realizado com sucesso."
-    }), 200
+        status_code=200
+    )
 
 
 # ── FISC-15a — GET /auth/me ──────────────────────────────────────
@@ -154,14 +188,14 @@ def me():
     conn.close()
 
     if not usuario:
-        return jsonify({"status": "error", "data": None,
-                        "message": "Usuário não encontrado."}), 404
+        return standard_response(success=False, message="Usuário não encontrado.", data=None, status_code=404)
 
-    return jsonify({
-        "status": "success",
-        "data":    dict(usuario),
-        "message": "Dados do usuário logado."
-    }), 200
+    return standard_response(
+        success=True,
+        message="Dados do usuário logado.",
+        data=dict(usuario),
+        status_code=200
+    )
 
 
 # ── FISC-15b — POST /auth/logout ────────────────────────────────
@@ -172,8 +206,9 @@ def logout():
     Logout stateless: JWT não tem invalidação server-side.
     O cliente deve descartar o token localmente.
     """
-    return jsonify({
-        "status":  "success",
-        "data":    None,
-        "message": "Logout realizado. Descarte o token no cliente."
-    }), 200
+    return standard_response(
+        success=True,
+        message="Logout realizado. Descarte o token no cliente.",
+        data=None,
+        status_code=200
+    )

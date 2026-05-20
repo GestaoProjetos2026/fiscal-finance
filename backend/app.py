@@ -19,6 +19,7 @@ from public_api import public_bp
 from stock      import stock_bp   # FISC-19: entrada de estoque
 from usuarios   import usuarios_bp
 from database   import init_db
+from utils      import standard_response
 
 app = Flask(__name__)
 
@@ -75,22 +76,22 @@ def frontend_static(filename):
     full = _os.path.join(_FRONTEND_DIR, filename)
     if _os.path.isfile(full):
         return send_from_directory(_FRONTEND_DIR, filename)
-    return jsonify({"status": "error", "data": None, "message": "Rota não encontrada."}), 404
+    return standard_response(success=False, message="Rota não encontrada.", data=None, status_code=404)
 
 
 
 # ── Handler global de erros ───────────────────────────────────
 @app.errorhandler(404)
 def nao_encontrado(e):
-    return jsonify({"status": "error", "data": None, "message": "Rota não encontrada."}), 404
+    return standard_response(success=False, message="Rota não encontrada.", data=None, status_code=404)
 
 @app.errorhandler(405)
 def metodo_nao_permitido(e):
-    return jsonify({"status": "error", "data": None, "message": "Método HTTP não permitido."}), 405
+    return standard_response(success=False, message="Método HTTP não permitido.", data=None, status_code=405)
 
 @app.errorhandler(500)
 def erro_interno(e):
-    return jsonify({"status": "error", "data": None, "message": "Erro interno do servidor."}), 500
+    return standard_response(success=False, message="Erro interno do servidor.", data=None, status_code=500)
 
 
 if __name__ == "__main__":

@@ -4,7 +4,8 @@
 # FISC-23: POST /v1/fisc/invoice/confirm   → confirma nota, baixa estoque, registra no caixa
 # FISC-24: GET  /v1/fisc/invoice/<numero>  → busca nota por número
 
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request
+from utils import standard_response
 from database import get_connection
 from datetime import datetime
 
@@ -22,13 +23,11 @@ def calcular_intencao():
     """
     dados = request.get_json()
     if not dados or "itens" not in dados:
-        return jsonify({"status": "error", "data": None,
-                        "message": "Corpo inválido. Envie: { \"itens\": [{\"sku\": ..., \"quantidade\": ...}] }"}), 400
+        return standard_response(success=False, message="Corpo inválido. Envie: { \"itens\": [{\"sku\": ..., \"quantidade\": ...}] }", data=None, status_code=400)
 
     itens_req = dados["itens"]
     if not itens_req:
-        return jsonify({"status": "error", "data": None,
-                        "message": "A lista de itens não pode ser vazia."}), 400
+        return standard_response(success=False, message="A lista de itens não pode ser vazia.", data=None, status_code=400)
 
     conn = get_connection()
     cursor = conn.cursor()
@@ -78,15 +77,9 @@ def calcular_intencao():
     conn.close()
 
     if skus_invalidos and not itens_calculados:
-        return jsonify({
-            "status": "error",
-            "data":   {"skus_invalidos": skus_invalidos},
-            "message": "Nenhum item válido encontrado."
-        }), 422
+        return standard_response(success=False, message="Nenhum item válido encontrado.", data={"skus_invalidos": skus_invalidos}, status_code=422)
 
-    return jsonify({
-        "status": "success",
-        "data": {
+    return standard_response(success=True, message="Intenção calculada. Use /invoice/confirm para confirmar.", data={
             "itens":           itens_calculados,
             "skus_invalidos":  skus_invalidos,
             "totais": {
@@ -94,9 +87,7 @@ def calcular_intencao():
                 "total_imposto":  round(total_imposto, 2),
                 "total_final":    round(total_final,   2)
             }
-        },
-        "message": "Intenção calculada. Use /invoice/confirm para confirmar."
-    }), 200
+        }, status_code=200)
 
 
 # ─────────────────────────────────────────────────────────
@@ -111,19 +102,16 @@ def confirmar_nota():
     """
     dados = request.get_json()
     if not dados:
-        return jsonify({"status": "error", "data": None,
-                        "message": "Corpo da requisição inválido."}), 400
+        return standard_response(success=False, message="Corpo da requisição inválido.", data=None, status_code=400)
 
     numero    = str(dados.get("numero", "")).strip()
     descricao = str(dados.get("descricao", "Nota confirmada via API")).strip()
     itens_req = dados.get("itens", [])
 
     if not numero:
-        return jsonify({"status": "error", "data": None,
-                        "message": "Campo 'numero' é obrigatório."}), 400
+        return standard_response(success=False, message="Campo 'numero' é obrigatório.", data=None, status_code=400)
     if not itens_req:
-        return jsonify({"status": "error", "data": None,
-                        "message": "A lista de itens não pode ser vazia."}), 400
+        return standard_response(success=False, message="A lista de itens não pode ser vazia.", data=None, status_code=400)
 
     conn = get_connection()
     cursor = conn.cursor()
@@ -132,8 +120,7 @@ def confirmar_nota():
     cursor.execute("SELECT id FROM notas_fiscais WHERE numero_nota = ?", (numero,))
     if cursor.fetchone():
         conn.close()
-        return jsonify({"status": "error", "data": None,
-                        "message": f"Nota '{numero}' já existe."}), 409
+        return standard_response(success=False, message=f"Nota '{numero}' já existe.", data=None, status_code=409)
 
     # Valida e calcula todos os itens
     itens_validos = []
@@ -153,10 +140,7 @@ def confirmar_nota():
         estoque_atual = p.get("estoque", 0)
         if estoque_atual < qtd:
             conn.close()
-            return jsonify({
-                "status": "error", "data": None,
-                "message": f"Estoque insuficiente para SKU '{sku}'. Disponível: {estoque_atual}, necessário: {qtd}."
-            }), 422
+            return standard_response(success=False, message=f"Estoque insuficiente para SKU '{sku}'. Disponível: {estoque_atual}, necessário: {qtd}.", data=None, status_code=422)
 
         aliquota = p.get("aliquota", p.get("aliquota_imposto", 0))
         vb = p["preco_base"] * qtd
@@ -167,11 +151,7 @@ def confirmar_nota():
 
     if skus_invalidos:
         conn.close()
-        return jsonify({
-            "status": "error",
-            "data":   {"skus_invalidos": skus_invalidos},
-            "message": "Existem SKUs inválidos. Corrija e tente novamente."
-        }), 422
+        return standard_response(success=False, message="Existem SKUs inválidos. Corrija e tente novamente.", data={"skus_invalidos": skus_invalidos}, status_code=422)
 
     # Operação atômica
     try:
@@ -215,23 +195,18 @@ def confirmar_nota():
         conn.commit()
         conn.close()
 
-        return jsonify({
-            "status": "success",
-            "data": {
+        return standard_response(success=True, message=f"Nota '{numero}' emitida com sucesso!", data={
                 "nota_id":     nota_id,
                 "numero":      numero,
                 "status":      "emitida",
                 "total_final": round(total_final, 2),
                 "itens":       len(itens_validos)
-            },
-            "message": f"Nota '{numero}' emitida com sucesso!"
-        }), 201
+            }, status_code=201)
 
     except Exception as e:
         conn.rollback()
         conn.close()
-        return jsonify({"status": "error", "data": None,
-                        "message": f"Erro interno ao confirmar nota: {str(e)}"}), 500
+        return standard_response(success=False, message=f"Erro interno ao confirmar nota: {str(e)}", data=None, status_code=500)
 
 
 # ─────────────────────────────────────────────────────────
@@ -250,8 +225,7 @@ def buscar_nota(numero):
 
     if not nota:
         conn.close()
-        return jsonify({"status": "error", "data": None,
-                        "message": f"Nota '{numero}' não encontrada."}), 404
+        return standard_response(success=False, message=f"Nota '{numero}' não encontrada.", data=None, status_code=404)
 
     nota_dict = dict(nota)
 
@@ -271,12 +245,8 @@ def buscar_nota(numero):
 
     conn.close()
 
-    return jsonify({
-        "status": "success",
-        "data": {
+    return standard_response(success=True, message="Nota encontrada.", data={
             "nota":   nota_dict,
             "itens":  itens,
             "totais": {"total_final": round(total, 2), "num_itens": len(itens)}
-        },
-        "message": "Nota encontrada."
-    }), 200
+        }, status_code=200)

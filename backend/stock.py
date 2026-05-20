@@ -9,7 +9,8 @@
 #   3. Registra log em estoque_mov (tipo='entrada')
 #   4. Registra custo na tabela caixa (tipo='compra') para impactar o fluxo de caixa
 
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request
+from utils import standard_response
 from database import get_connection
 from datetime import datetime
 
@@ -26,8 +27,7 @@ def entrada_estoque():
     dados = request.get_json()
 
     if not dados:
-        return jsonify({"status": "error", "data": None,
-                        "message": "Envie um JSON válido."}), 400
+        return standard_response(success=False, message="Envie um JSON válido.", data=None, status_code=400)
 
     sku       = str(dados.get("sku", "")).strip().upper()
     quantidade = dados.get("quantidade")
@@ -35,12 +35,10 @@ def entrada_estoque():
 
     # Validações
     if not sku:
-        return jsonify({"status": "error", "data": None,
-                        "message": "Campo 'sku' é obrigatório."}), 400
+        return standard_response(success=False, message="Campo 'sku' é obrigatório.", data=None, status_code=400)
 
     if not isinstance(quantidade, int) or quantidade <= 0:
-        return jsonify({"status": "error", "data": None,
-                        "message": "Campo 'quantidade' deve ser um número inteiro maior que 0."}), 400
+        return standard_response(success=False, message="Campo 'quantidade' deve ser um número inteiro maior que 0.", data=None, status_code=400)
 
     conn = get_connection()
     cursor = conn.cursor()
@@ -51,8 +49,7 @@ def entrada_estoque():
 
     if not produto:
         conn.close()
-        return jsonify({"status": "error", "data": None,
-                        "message": f"Produto '{sku}' não encontrado no cadastro."}), 404
+        return standard_response(success=False, message=f"Produto '{sku}' não encontrado no cadastro.", data=None, status_code=404)
 
     p          = dict(produto)
     custo_total = round(quantidade * p["preco_base"], 2)
@@ -84,9 +81,7 @@ def entrada_estoque():
         saldo_atual = cursor.fetchone()["estoque"]
         conn.close()
 
-        return jsonify({
-            "status": "success",
-            "data": {
+        return standard_response(success=True, message=f"Entrada de {quantidade} unidade(s) de '{p['nome']}' registrada. Saldo atual: {saldo_atual}.", data={
                 "sku":         sku,
                 "nome":        p["nome"],
                 "tipo":        "entrada",
@@ -94,12 +89,9 @@ def entrada_estoque():
                 "motivo":      motivo,
                 "custo_total": custo_total,
                 "saldo_atual": saldo_atual
-            },
-            "message": f"Entrada de {quantidade} unidade(s) de '{p['nome']}' registrada. Saldo atual: {saldo_atual}."
-        }), 201
+            }, status_code=201)
 
     except Exception as e:
         conn.rollback()
         conn.close()
-        return jsonify({"status": "error", "data": None,
-                        "message": f"Erro interno ao registrar entrada: {str(e)}"}), 500
+        return standard_response(success=False, message=f"Erro interno ao registrar entrada: {str(e)}", data=None, status_code=500)

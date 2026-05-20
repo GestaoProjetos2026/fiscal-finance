@@ -75,8 +75,8 @@
     setLoading(btn, false);
 
     if (res.ok) {
-      setToken(res.body.data.token);
-      setUser({ nome: res.body.data.nome, papel: res.body.data.papel });
+      setToken(res.body.data.access_token);
+      setUser({ nome: res.body.data.user.nome, papel: res.body.data.user.papel });
       toast('Login realizado com sucesso!', 'success');
       setTimeout(() => { window.location.href = 'dashboard.html'; }, 600);
     } else {
