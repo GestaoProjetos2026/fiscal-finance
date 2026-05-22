@@ -1,0 +1,69 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 130" width="100%" height="100%">
+  <defs>
+    <!-- Gradients for the 3D hexagon and nodes -->
+    <linearGradient id="primaryGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00d2ff"/>
+      <stop offset="100%" stop-color="#0066eb"/>
+    </linearGradient>
+    <linearGradient id="faceGradTop" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#00b4db"/>
+      <stop offset="100%" stop-color="#0083b0"/>
+    </linearGradient>
+    <linearGradient id="faceGradLeft" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0099ff"/>
+      <stop offset="100%" stop-color="#0044cc"/>
+    </linearGradient>
+    <linearGradient id="faceGradRight" x1="100%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#0088ff"/>
+      <stop offset="100%" stop-color="#0033aa"/>
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity="0.3"/>
+    </filter>
+  </defs>
+
+  <!-- Logo Icon (Modular Hexagon) -->
+  <g transform="translate(5, 5)">
+    <!-- Connection lines between outer and inner vertices -->
+    <line x1="65" y1="10" x2="65" y2="35" stroke="url(#primaryGrad)" stroke-width="4.5" stroke-linecap="round"/>
+    <line x1="113" y1="37" x2="91" y2="50" stroke="url(#primaryGrad)" stroke-width="4.5" stroke-linecap="round"/>
+    <line x1="113" y1="93" x2="91" y2="80" stroke="url(#primaryGrad)" stroke-width="4.5" stroke-linecap="round"/>
+    <line x1="65" y1="120" x2="65" y2="95" stroke="url(#primaryGrad)" stroke-width="4.5" stroke-linecap="round"/>
+    <line x1="17" y1="93" x2="39" y2="80" stroke="url(#primaryGrad)" stroke-width="4.5" stroke-linecap="round"/>
+    <line x1="17" y1="37" x2="39" y2="50" stroke="url(#primaryGrad)" stroke-width="4.5" stroke-linecap="round"/>
+
+    <!-- Outer Hexagon Border -->
+    <polygon points="65,10 113,37 113,93 65,120 17,93 17,37" fill="none" stroke="url(#primaryGrad)" stroke-width="8.5" stroke-linejoin="round"/>
+
+    <!-- Inner 3D Cube Structure -->
+    <!-- Top Face -->
+    <polygon points="65,35 87,47 65,60 43,47" fill="url(#faceGradTop)"/>
+    <!-- Left Face -->
+    <polygon points="43,47 65,60 65,88 43,75" fill="url(#faceGradLeft)"/>
+    <!-- Right Face -->
+    <polygon points="65,60 87,47 87,75 65,88" fill="url(#faceGradRight)"/>
+
+    <!-- Connector Spheres / Nodes (at the vertices of the outer hexagon) -->
+    <circle cx="65" cy="10" r="5" fill="#ffffff" stroke="url(#primaryGrad)" stroke-width="3.5"/>
+    <circle cx="113" cy="37" r="5" fill="#ffffff" stroke="url(#primaryGrad)" stroke-width="3.5"/>
+    <circle cx="113" cy="93" r="5" fill="#ffffff" stroke="url(#primaryGrad)" stroke-width="3.5"/>
+    <circle cx="65" cy="120" r="5" fill="#ffffff" stroke="url(#primaryGrad)" stroke-width="3.5"/>
+    <circle cx="17" cy="93" r="5" fill="#ffffff" stroke="url(#primaryGrad)" stroke-width="3.5"/>
+    <circle cx="17" cy="37" r="5" fill="#ffffff" stroke="url(#primaryGrad)" stroke-width="3.5"/>
+
+    <!-- Central Node -->
+    <circle cx="65" cy="60" r="4.5" fill="#ffffff" filter="url(#shadow)"/>
+  </g>
+
+  <!-- Typography -->
+  <g transform="translate(135, 10)">
+    <!-- ConeXus -->
+    <text x="0" y="70" font-family="'Orbitron', 'Rajdhani', 'Montserrat', 'Segoe UI', sans-serif" font-size="64" font-weight="900" fill="#0c1e36" letter-spacing="-1.5">
+      Cone<tspan fill="#0072ff">X</tspan>us
+    </text>
+    <!-- ERP MODULAR INTEGRADO -->
+    <text x="3" y="102" font-family="'Rajdhani', 'Montserrat', 'Segoe UI', sans-serif" font-size="16.5" font-weight="700" fill="#334155" letter-spacing="4.8">
+      ERP MODULAR INTEGRADO
+    </text>
+  </g>
+</svg>
