@@ -1,6 +1,6 @@
 import bcrypt
-from flask import Blueprint, request
-from utils import standard_response, g
+from flask import Blueprint, request, g
+from utils import standard_response
 from database import get_connection
 from auth import requer_auth
 
