@@ -7,7 +7,7 @@ on:
 
 jobs:
   deploy:
-    uses: GestaoProjetos2026/pipeline-centralizado/.github/workflows/pipeline.yaml@main
+    uses: GestaoProjetos2026/pipeline-centralizado/.github/workflows/pipeline2.yaml@main
     secrets:
       DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
       DOCKERHUB_PASSWORD: ${{ secrets.DOCKERHUB_PASSWORD }}
