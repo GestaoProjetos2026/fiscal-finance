@@ -9,6 +9,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copia o código da API
 COPY . .
 
+# Cria diretório docs (será preenchido pelo docker-compose ou build context)
+RUN mkdir -p /docs
+
 # Expor a porta que o Flask utiliza
 EXPOSE 5000
 

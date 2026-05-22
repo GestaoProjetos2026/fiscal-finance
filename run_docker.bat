@@ -14,6 +14,10 @@ docker-compose up -d --build
 echo.
 echo ==================================================
 echo   Containers rodando!
-echo   Acesse: http://localhost:8080/
+echo   Abrindo navegador em http://localhost:8080/
 echo ==================================================
+echo.
+
+start http://localhost:8080/
+
 pause
