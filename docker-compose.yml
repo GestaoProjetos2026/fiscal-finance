@@ -1,26 +1,15 @@
 version: '3.8'
 
 services:
-  backend:
-    build: 
-      context: ./backend
-      dockerfile: Dockerfile
-    container_name: container-fisc-backend
-    expose:
-      - "5000"
+  fiscal-finance-api:
+    build: .
+    container_name: container-fisc
+    ports:
+      - "8080:5000"
     volumes:
+      # Mapeia a pasta data/ local para o diretório de dados dentro do container,
+      # garantindo que o banco de dados SQLite não seja perdido ao deletar o container.
       - ./data:/app/data
     env_file:
       - .env
-    restart: unless-stopped
-
-  frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-    container_name: container-fisc-frontend
-    ports:
-      - "8080:80"
-    depends_on:
-      - backend
     restart: unless-stopped
