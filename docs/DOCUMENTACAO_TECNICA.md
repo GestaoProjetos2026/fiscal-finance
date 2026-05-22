@@ -10,6 +10,10 @@ A aplicação é dividida em um **Frontend** (Single Page Application) e um **Ba
 
 ```mermaid
 flowchart TD
+    subgraph Externa [Sistemas Externos]
+        OutrosSquads[Outros Squads\n(Squad 1, 3, 4, Dev)]
+    end
+
     subgraph Frontend [Frontend Web - SPA]
         UI[Interface do Usuário\nHTML5, CSS3, JS Vanilla]
         Fetch[Fetch API\nChamadas Assíncronas]
@@ -17,7 +21,7 @@ flowchart TD
 
     subgraph Backend [Backend - API REST]
         Flask[Flask App / Roteador]
-        Auth[Módulo de Autenticação]
+        Auth[Módulo de Autenticação\ne API Key]
         Prod[Módulos de Negócios\n(Produtos, Estoque, Notas, Caixa)]
         DBLayer[database.py\nCamada de Acesso]
     end
@@ -26,8 +30,9 @@ flowchart TD
         SQLite[(SQLite\napp.db)]
     end
 
+    OutrosSquads <-->|HTTP / JSON\nAPI Pública| Flask
     UI <-->|Interação| Fetch
-    Fetch <-->|HTTP / JSON| Flask
+    Fetch <-->|HTTP / JSON\nAPI Interna| Flask
     Flask --> Auth
     Flask --> Prod
     Auth --> DBLayer
