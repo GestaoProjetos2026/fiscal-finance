@@ -8,10 +8,17 @@ services:
       - "5000"
     volumes:
       - ./data:/app/data
+      - ./docs:/docs
     env_file:
       - path: .env
         required: false
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:5000/v1/fisc/products')"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
 
   frontend:
     build:
@@ -21,5 +28,7 @@ services:
     ports:
       - "8080:80"
     depends_on:
-      - backend
+      backend:
+        condition: service_healthy
     restart: unless-stopped
+
