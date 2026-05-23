@@ -27,10 +27,16 @@ app = Flask(__name__)
 CORS(app)
 
 # ── Swagger UI — acessível em GET /docs ───────────────────────
-_SPEC_PATH = os.path.join(os.path.dirname(__file__), "..", "docs", "openapi.json")
+_SPEC_PATH = os.path.join(os.path.dirname(__file__), "openapi.json")
 
-with open(_SPEC_PATH, encoding="utf-8") as f:
-    _openapi_spec = json.load(f)
+if not os.path.exists(_SPEC_PATH):
+    _SPEC_PATH = os.path.join(os.path.dirname(__file__), "..", "docs", "openapi.json")
+
+try:
+    with open(_SPEC_PATH, encoding="utf-8") as f:
+        _openapi_spec = json.load(f)
+except FileNotFoundError:
+    _openapi_spec = {"info": {"title": "API FISC", "version": "1.0.0"}, "paths": {}}
 
 swagger_config = {
     "headers": [],
