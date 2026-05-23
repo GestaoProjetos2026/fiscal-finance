@@ -56,8 +56,18 @@ def criar_usuario():
             INSERT INTO usuarios (nome, email, senha_hash, papel)
             VALUES (?, ?, ?, ?)
         """, (nome, email, senha_hash, papel))
+        
+        cursor.execute("SELECT id FROM usuarios WHERE email = ?", (email,))
+        usuario_row = cursor.fetchone()
+        if usuario_row:
+            try:
+                novo_id = usuario_row["id"]
+            except Exception:
+                novo_id = usuario_row[0]
+        else:
+            novo_id = cursor.lastrowid
+            
         conn.commit()
-        novo_id = cursor.lastrowid
     except Exception as e:
         conn.close()
         return standard_response(success=False, message=f"Erro ao criar usuário: {str(e)}", data=None, status_code=500)

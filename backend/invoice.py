@@ -183,7 +183,15 @@ def confirmar_nota():
             "INSERT INTO notas_fiscais (numero_nota, descricao, status, pdf_url, data_criacao) VALUES (?, ?, 'emitida', ?, ?)",
             (numero, descricao, dummy_pdf_url, agora)
         )
-        nota_id = cursor.lastrowid
+        cursor.execute("SELECT id FROM notas_fiscais WHERE numero_nota = ?", (numero,))
+        nota_row = cursor.fetchone()
+        if nota_row:
+            try:
+                nota_id = nota_row["id"]
+            except Exception:
+                nota_id = nota_row[0]
+        else:
+            nota_id = cursor.lastrowid
 
         total_final = 0.0
         for item in itens_validos:
