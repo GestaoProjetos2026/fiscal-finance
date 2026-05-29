@@ -46,21 +46,23 @@ O token é obtido via `POST /v1/fisc/auth/login`.
 ## 🔐 AUTH — `/v1/fisc/auth`
 
 ### `POST /v1/fisc/oauth/token`
-Realiza o login via OAuth2 (Password Grant) e retorna um token JWT válido por 24h.
+Realiza o login centralizado de forma híbrida contra o Core Engine (REST API) ou com fallback local automático (SQLite + Bcrypt) caso o Core esteja offline. Retorna um token JWT do Fiscal válido por 24h.
 
 **Headers:**
 ```
-Content-Type: application/x-www-form-urlencoded
+Content-Type: application/json  (também suporta application/x-www-form-urlencoded)
 ```
 
-**Body (Form-Data):**
-```
-grant_type=password
-username=admin@fiscal.com
-password=admin123
+**Body (JSON ou Form-Data):**
+```json
+{
+  "grant_type": "password",
+  "username": "kevin@fiscal.com",
+  "password": "SenhaDoCore123!"
+}
 ```
 
-**Resposta (`200`):**
+**Resposta (`200` - Autenticação via Core):**
 ```json
 {
   "status": "success",
@@ -69,16 +71,36 @@ password=admin123
     "token_type": "Bearer",
     "expires_in": 86400,
     "user": {
-      "id": 1,
-      "nome": "Administrador",
-      "papel": "admin"
+      "id": 8,
+      "nome": "Kevin",
+      "papel": "viewer",
+      "tipo": "externo"
     }
   },
-  "message": "Login OAuth2 realizado com sucesso."
+  "message": "Login realizado com sucesso via Core Engine."
 }
 ```
 
-> **Nota:** A rota legada `POST /v1/fisc/auth/login` foi descontinuada em favor do padrão OAuth2 (`/oauth/token`).
+**Resposta (`200` - Fallback local offline):**
+```json
+{
+  "status": "success",
+  "data": {
+    "access_token": "eyJ...",
+    "token_type": "Bearer",
+    "expires_in": 86400,
+    "user": {
+      "id": 2,
+      "nome": "Chefe Fiscal",
+      "papel": "admin",
+      "tipo": "local"
+    }
+  },
+  "message": "Login local realizado com sucesso."
+}
+```
+
+> **Nota:** O campo `user.tipo` indica se o usuário logado foi autenticado externamente via Core (`externo`) ou via banco local SQLite com Bcrypt (`local`). A rota suporta payload JSON ou Form-Data.
 
 ---
 

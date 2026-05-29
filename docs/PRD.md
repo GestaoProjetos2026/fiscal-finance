@@ -74,7 +74,7 @@ Empresas enfrentam gargalos pela falta de sincronia entre a venda, o estoque e o
 | **Linguagem** | Python 3.12 | Core da aplicação backend. |
 | **Framework Web** | Flask | Servidor de APIs REST. |
 | **Banco de Dados** | SQLite 3 | Armazenamento local persistente (`app.db`). |
-| **Autenticação** | JWT + SHA-256 | Tokens de sessão stateless e hashing de senhas. |
+| **Autenticação** | Híbrida SSO (Core REST) + Bcrypt | SSO Centralizado via Core Engine (REST API) e fallback local com criptografia Bcrypt. |
 | **Frontend** | Web Moderno | HTML5, CSS3, JS (Vanilla) servido pelo Flask. |
 | **Documentação** | Flasgger | Swagger UI interativo disponível em `/docs`. |
 | **Containerização** | Docker | Dockerfile e Docker Compose. |
@@ -162,6 +162,7 @@ CREATE TABLE notas_fiscais (
     numero_nota  TEXT NOT NULL UNIQUE,
     descricao    TEXT NOT NULL,
     status       TEXT NOT NULL DEFAULT 'rascunho', -- rascunho, emitida
+    pdf_url      TEXT,
     data_criacao DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -203,7 +204,7 @@ CREATE TABLE caixa (
 
 ## 11. SEGURANÇA E AUTENTICAÇÃO
 
-- **Interna:** JWT (JSON Web Token) com expiração de 24h. Senhas protegidas por hash SHA-256.
+- **Interna (SSO Híbrido):** Integração SSO com o Core Engine (Squad 1). Validação e autenticação via API REST do Core, com sincronização automática de dados. Possui fallback local standalone para banco SQLite (`usuarios`) com hashing de senhas seguro via **Bcrypt** e tokens JWT (expiração de 24h).
 - **Externa:** Cabeçalho `X-API-KEY` obrigatório para todos os endpoints em `/v1/public/`.
 - **Banco:** Conexões seguras e proteção contra SQL Injection via uso de parâmetros em todas as queries.
 
