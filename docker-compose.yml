@@ -26,6 +26,8 @@ services:
     depends_on:
       - backend
     restart: unless-stopped
+    environment:
+      - BACKEND_HOST=backend
     networks:
       - erp-network
 
