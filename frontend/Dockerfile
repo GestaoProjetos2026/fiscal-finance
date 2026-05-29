@@ -4,7 +4,7 @@ FROM nginx:alpine
 COPY . /usr/share/nginx/html
 
 # Define environment variables for dynamic resolution
-ENV BACKEND_HOST=fiscal-finance-backend
+ENV BACKEND_HOST=backend
 ENV NGINX_ENVSUBST_FILTER=BACKEND_HOST
 
 # Copy custom NGINX configuration as a template for envsubst
