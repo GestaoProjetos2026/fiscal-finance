@@ -92,6 +92,12 @@ def frontend_static(filename):
 
 
 
+# ── Endpoint de Health Check (Kubernetes/Liveness/Readiness) ──
+@app.route("/health")
+def health_check():
+    return jsonify({"status": "healthy"}), 200
+
+
 # ── Handler global de erros ───────────────────────────────────
 @app.errorhandler(404)
 def nao_encontrado(e):
