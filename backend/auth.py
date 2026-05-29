@@ -135,38 +135,49 @@ def oauth_token():
     if not username or not password:
         return standard_response(success=False, message="Campos 'username' e 'password' são obrigatórios.", data=None, status_code=400)
 
-    # Configuração da URL do Core
-    CORE_BACKEND_URL = os.getenv("CORE_BACKEND_URL", "http://erp-backend:3000")
+    # Configuração da URL do Core (Busca dinâmica e tolerante a falhas)
+    CORE_BACKEND_URL = os.getenv("CORE_BACKEND_URL")
+    urls_to_try = []
+    if CORE_BACKEND_URL:
+        urls_to_try.append(CORE_BACKEND_URL)
+    else:
+        urls_to_try = [
+            "http://core-engine-backend-svc.core-engine.svc.cluster.local:3000",
+            "http://core-engine-backend-svc:3000",
+            "http://erp-backend:3000"
+        ]
 
     # 1. Tentar autenticação contra o Core Engine via REST
     core_auth_sucesso = False
     core_user_data = None
 
-    try:
-        res_login = requests.post(
-            f"{CORE_BACKEND_URL}/v1/auth/login",
-            json={"email": username, "password": password},
-            timeout=2.5
-        )
-        if res_login.status_code in (200, 201):
-            body_login = res_login.json()
-            if body_login.get("success"):
-                access_token = body_login["data"]["accessToken"]
-                
-                # Obter dados do usuário no Core
-                res_me = requests.get(
-                    f"{CORE_BACKEND_URL}/v1/auth/me",
-                    headers={"Authorization": f"Bearer {access_token}"},
-                    timeout=2.5
-                )
-                if res_me.status_code == 200:
-                    body_me = res_me.json()
-                    if body_me.get("success"):
-                        core_user_data = body_me["data"]
-                        core_auth_sucesso = True
-    except Exception as err:
-        # Falha silenciosa para fallback local em caso de erro de rede ou Core indisponível
-        print("Erro de conexão com o Core Engine. Fazendo fallback local:", err)
+    for url in urls_to_try:
+        try:
+            res_login = requests.post(
+                f"{url}/v1/auth/login",
+                json={"email": username, "password": password},
+                timeout=2.0
+            )
+            if res_login.status_code in (200, 201):
+                body_login = res_login.json()
+                if body_login.get("success"):
+                    access_token = body_login["data"]["accessToken"]
+                    
+                    # Obter dados do usuário no Core
+                    res_me = requests.get(
+                        f"{url}/v1/auth/me",
+                        headers={"Authorization": f"Bearer {access_token}"},
+                        timeout=2.0
+                    )
+                    if res_me.status_code == 200:
+                        body_me = res_me.json()
+                        if body_me.get("success"):
+                            core_user_data = body_me["data"]
+                            core_auth_sucesso = True
+                            CORE_BACKEND_URL = url
+                            break
+        except Exception as err:
+            print(f"Falha de conexão com Core Engine na URL {url}. Tentando próxima... Erro: {err}")
 
     if core_auth_sucesso and core_user_data:
         # Sincronizar usuário do Core localmente na tabela SQLite do Fiscal
