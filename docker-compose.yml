@@ -14,7 +14,9 @@ services:
       - .env
     restart: unless-stopped
     networks:
-      - erp-network
+      erp-network:
+        aliases:
+          - fiscal-finance-backend-svc
 
   frontend:
     build:
@@ -26,8 +28,6 @@ services:
     depends_on:
       - backend
     restart: unless-stopped
-    environment:
-      - BACKEND_HOST=backend
     networks:
       - erp-network
 
