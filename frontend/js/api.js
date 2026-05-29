@@ -33,14 +33,25 @@ async function apiFetch(path, options = {}) {
   const token = getToken();
   const headers = {
     'Content-Type': 'application/json',
-    ...(token ? { 'Authorization': token } : {}),
+    ...(token ? { 'Authorization': token.startsWith('Bearer ') ? token : `Bearer ${token}` } : {}),
     ...(options.headers || {})
   };
 
-  const res = await fetch(`${API_BASE}${path}`, {
-    ...options,
-    headers
-  });
+  let res;
+  try {
+    res = await fetch(`${API_BASE}${path}`, {
+      ...options,
+      headers
+    });
+  } catch (err) {
+    console.error('Erro de conexão:', err);
+    if (!options.silent) {
+      if (window.toast) {
+        window.toast('Falha de conexão com o servidor. Verifique se os contêineres estão ativos.', 'error');
+      }
+    }
+    return { ok: false, status: 503, body: { message: 'Servidor indisponível no momento.' } };
+  }
 
   let json = {};
   try {

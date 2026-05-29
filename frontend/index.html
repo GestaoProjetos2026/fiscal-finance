@@ -76,7 +76,12 @@
 
     if (res.ok) {
       setToken(res.body.data.access_token);
-      setUser({ nome: res.body.data.user.nome, papel: res.body.data.user.papel });
+      setUser({ 
+        nome: res.body.data.user.nome, 
+        papel: res.body.data.user.papel, 
+        email: email, 
+        tipo: res.body.data.user.tipo 
+      });
       toast('Login realizado com sucesso!', 'success');
       setTimeout(() => { window.location.href = 'dashboard.html'; }, 600);
     } else {

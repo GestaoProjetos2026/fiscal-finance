@@ -62,6 +62,7 @@ function injectLayout(pageId, pageTitle) {
             <div class="user-name" id="sidebar-user-name">Carregando...</div>
             <div class="user-role" id="sidebar-user-role">—</div>
           </div>
+          <a href="api-tester.html" class="btn-settings" title="Opções" id="btn-sidebar-settings" style="display:none; text-decoration:none; margin-right:12px; font-size:16px; color:var(--text-light); transition:color 0.2s;" onmouseover="this.style.color='var(--primary)'" onmouseout="this.style.color='var(--text-light)'">⚙️</a>
           <button class="btn-logout" title="Sair" onclick="handleLogout()">⏻</button>
         </div>
       </div>
@@ -104,13 +105,42 @@ function injectLayout(pageId, pageTitle) {
   // Preenche dados do user
   fillUserSidebar();
 
-  // Mostra links restritos somente para admin
+  // Regras de controle de acesso visual (IAM / Frontend)
   const _u = getUser();
-  if (_u && _u.papel === 'admin') {
-    const navTester = document.getElementById('nav-api-tester');
-    if (navTester) navTester.style.display = '';
+  if (_u) {
+    // Identificar Chefe e Admin Local
+    const isChefe = _u.email === 'chefe@fiscal.com' || (_u.nome && _u.nome.toLowerCase().includes('chefe'));
+    const isLocalAdmin = _u.papel === 'admin' && !isChefe && _u.tipo === 'local';
+
+    // 1. Mostrar Gestão de Usuários apenas para o Admin Local standalone (não Chefe, não Externo)
     const navUsuarios = document.getElementById('nav-usuarios');
-    if (navUsuarios) navUsuarios.style.display = '';
+    if (navUsuarios) {
+      if (isLocalAdmin) {
+        navUsuarios.style.display = '';
+      } else {
+        navUsuarios.style.display = 'none';
+      }
+    }
+
+    // 2. Exibição da aba API Tester na sidebar principal (apenas para Admin Local principal, não Chefe)
+    const navTester = document.getElementById('nav-api-tester');
+    if (navTester) {
+      if (isLocalAdmin) {
+        navTester.style.display = '';
+      } else {
+        navTester.style.display = 'none';
+      }
+    }
+
+    // 3. Exibição da engrenagem de Opções no rodapé (para Chefe e Admin Local)
+    const btnSettings = document.getElementById('btn-sidebar-settings');
+    if (btnSettings) {
+      if (_u.papel === 'admin') {
+        btnSettings.style.display = 'inline-block';
+      } else {
+        btnSettings.style.display = 'none';
+      }
+    }
   }
 
   // Relógio no topbar

@@ -3,7 +3,7 @@
   "info": {
     "title": "Squad FISC — API Pública",
     "description": "API pública do sistema fiscal, financeiro e de estoque do Squad FISC. Disponível para integração inter-squads. Requer autenticação via header `X-API-KEY`.",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "contact": {
       "name": "Squad FISC",
       "url": "https://github.com/GestaoProjetos2026/Fiscal-Finance"
@@ -76,6 +76,34 @@
           "status":  { "type": "string", "enum": ["success", "error"] },
           "data":    { "type": "object", "nullable": true },
           "message": { "type": "string" }
+        }
+      }
+    },
+    "responses": {
+      "Forbidden": {
+        "description": "API Key inválida ou ausente",
+        "content": {
+          "application/json": {
+            "schema": { "$ref": "#/components/schemas/RespostaErro" },
+            "example": {
+              "status": "error",
+              "data": null,
+              "message": "Acesso negado. Informe uma API Key válida no header X-API-KEY."
+            }
+          }
+        }
+      },
+      "NotFound": {
+        "description": "Recurso não encontrado",
+        "content": {
+          "application/json": {
+            "schema": { "$ref": "#/components/schemas/RespostaErro" },
+            "example": {
+              "status": "error",
+              "data": null,
+              "message": "Recurso não encontrado."
+            }
+          }
         }
       }
     }

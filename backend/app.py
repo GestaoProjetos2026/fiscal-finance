@@ -36,7 +36,12 @@ try:
     with open(_SPEC_PATH, encoding="utf-8") as f:
         _openapi_spec = json.load(f)
 except FileNotFoundError:
-    _openapi_spec = {"info": {"title": "API FISC", "version": "1.0.0"}, "paths": {}}
+    _openapi_spec = {"info": {"title": "API FISC", "version": "1.1.0"}, "paths": {}}
+
+app.config['SWAGGER'] = {
+    'openapi': '3.0.3',
+    'optional_fields': ['components']
+}
 
 swagger_config = {
     "headers": [],
@@ -51,6 +56,7 @@ swagger_config = {
     "static_url_path": "/flasgger_static",
     "swagger_ui": True,
     "specs_route": "/docs",
+    "openapi": "3.0.3",
 }
 
 Swagger(app, config=swagger_config, template=_openapi_spec)

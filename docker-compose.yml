@@ -1,11 +1,11 @@
-version: '3.8'
-
 services:
   backend:
     build: 
       context: ./backend
       dockerfile: Dockerfile
     container_name: container-fisc-backend
+    ports:
+      - "5000:5000"
     expose:
       - "5000"
     volumes:
@@ -13,6 +13,8 @@ services:
     env_file:
       - .env
     restart: unless-stopped
+    networks:
+      - erp-network
 
   frontend:
     build:
@@ -24,3 +26,11 @@ services:
     depends_on:
       - backend
     restart: unless-stopped
+    networks:
+      - erp-network
+
+networks:
+  erp-network:
+    name: core-engine-main_erp-network
+    external: true
+
