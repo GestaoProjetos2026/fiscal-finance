@@ -3,7 +3,7 @@
   "info": {
     "title": "Squad FISC — API Pública",
     "description": "API pública do sistema fiscal, financeiro e de estoque do Squad FISC. Disponível para integração inter-squads. Requer autenticação via header `X-API-KEY`.",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "contact": {
       "name": "Squad FISC",
       "url": "https://github.com/GestaoProjetos2026/Fiscal-Finance"
