@@ -111,12 +111,19 @@ injectLayout('api-tester', 'API Tester');
 // ─── Definição de todos os endpoints ──────────────────────────────
 const ENDPOINTS = [
   // AUTH
-  { group: 'Auth (JWT)', id: 'auth-login', method: 'POST', path: '/v1/fisc/auth/login', name: 'Login', auth: false,
+  { group: 'Auth (JWT)', id: 'auth-login', method: 'POST', path: '/v1/fisc/oauth/token', name: 'Login', auth: false,
     fields: [
       { id: 'email', label: 'E-mail', type: 'email', placeholder: 'admin@fiscal.com', default: 'admin@fiscal.com' },
       { id: 'senha', label: 'Senha', type: 'password', placeholder: 'admin123', default: 'admin123' }
     ],
-    buildBody: (f) => ({ email: f.email, senha: f.senha })
+    buildBody: (f) => {
+      const params = new URLSearchParams();
+      params.append('grant_type', 'password');
+      params.append('username', f.email);
+      params.append('password', f.senha);
+      return params.toString();
+    },
+    buildHeaders: () => ({ 'Content-Type': 'application/x-www-form-urlencoded' })
   },
   { group: 'Auth (JWT)', id: 'auth-me', method: 'GET', path: '/v1/fisc/auth/me', name: 'Meus dados', auth: true,
     fields: [], buildBody: null
@@ -356,14 +363,16 @@ async function runEndpoint() {
   const reqDisplay = [
     `${activeEp.method} ${url}`,
     ...Object.entries(headers).map(([k,v]) => `${k}: ${k === 'Authorization' ? v.substring(0,30)+'…' : v}`),
-    body ? `\nBody: ${JSON.stringify(body, null, 2)}` : ''
+    body ? `\nBody: ${typeof body === 'string' ? body : JSON.stringify(body, null, 2)}` : ''
   ].join('\n');
 
   document.getElementById('response-box').textContent = `→ ${reqDisplay}\n\n⏳ Aguardando resposta...`;
 
   try {
     const opts = { method: activeEp.method, headers };
-    if (body) opts.body = JSON.stringify(body);
+    if (body) {
+      opts.body = headers['Content-Type'] === 'application/x-www-form-urlencoded' ? body : JSON.stringify(body);
+    }
 
     const t0 = Date.now();
     const res = await fetch(url, opts);
@@ -380,11 +389,18 @@ async function runEndpoint() {
       `→ ${reqDisplay}\n\n← ${JSON.stringify(json, null, 2)}`;
 
     // Se foi login com sucesso, salva token
-    if (activeEp.id === 'auth-login' && res.ok && json.data?.token) {
-      setToken(json.data.token);
-      setUser({ nome: json.data.nome, papel: json.data.papel });
-      updateAuthStatus();
-      toast('Token JWT salvo! Agora pode usar os endpoints protegidos.', 'success');
+    if (activeEp.id === 'auth-login' && res.ok) {
+      const tokenVal = json.data?.access_token || json.data?.token;
+      if (tokenVal) {
+        setToken(tokenVal);
+        if (json.data.user) {
+          setUser({ nome: json.data.user.nome, papel: json.data.user.papel });
+        } else {
+          setUser({ nome: json.data.nome, papel: json.data.papel });
+        }
+        updateAuthStatus();
+        toast('Token JWT salvo! Agora pode usar os endpoints protegidos.', 'success');
+      }
     }
 
     // Se foi logout, limpa token
