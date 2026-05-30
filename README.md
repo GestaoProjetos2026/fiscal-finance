@@ -26,6 +26,16 @@ Dentro do ecossistema Conexus ERP, o Fiscal Finance atua como a **fonte centrali
 
 ---
 
+## 📱 Galeria de Telas (Interface Showcase)
+
+Abaixo estão as pré-visualizações da interface web moderna, responsiva e com suporte nativo a tema escuro (dark mode) desenvolvida para o Fiscal Finance:
+
+| Tela de Autenticação (SSO / Local) | Dashboard Operacional em Tempo Real |
+|---|---|
+| ![Tela de Login](./docs/login_mockup.png) | ![Dashboard Financeiro](./docs/dashboard_mockup.png) |
+
+---
+
 ## 🎨 Diagrama de Arquitetura e Fluxo de Rede
 
 O Fiscal Finance é executado de forma totalmente containerizada e isolada no mesmo cluster Docker que os outros módulos do ERP, utilizando uma rede comum compartilhada de alto desempenho:
