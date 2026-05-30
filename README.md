@@ -89,16 +89,31 @@ Para desenvolvimento ou em ambientes sem Docker.
    - Subir o servidor da API Flask na porta 5000.
    - Abrir a interface web (frontend) no seu navegador padrão.
 
+
 ---
 
-## 🔑 Login Padrão
+## 🌐 Links e Acesso ao Ambiente de Produção (Nuvem)
 
-Para acessar o sistema, use as credenciais padrão de administrador:
+O sistema está totalmente implantado e orquestrado no cluster Kubernetes de Produção. Utilize os links oficiais abaixo para acessar e monitorar:
 
-| Campo | Valor |
-|---|---|
-| **E-mail** | `admin@fiscal.com` |
-| **Senha** | `admin123` |
+### 📱 Sistema Fiscal Finance (Interface Web)
+* **URL de Produção:** [https://app.fiscal-finance.40.82.176.176.nip.io/index.html](https://app.fiscal-finance.40.82.176.176.nip.io/index.html)
+* **Descrição:** Este é o ambiente web em nuvem do sistema Fiscal Finance integrado ao cluster.
+* **Opções de Acesso:** O sistema suporta dois tipos de autenticação (Local ou Federada integrada ao Core):
+  1. **Autenticação Federada (Core Engine):**
+     * **E-mail:** `fiscal@example.com`
+     * **Senha:** `Fiscal123!`
+  2. **Autenticação Local (SQLite do Fiscal):**
+     * **E-mail:** `admin@fiscal.com`
+     * **Senha:** `admin123`
+
+### 📊 Observabilidade e Logs (Grafana + Loki)
+* **Painel Grafana (Dashboard Conexus):** [http://grafana.40.82.176.176.nip.io/d/e678880d-2ab5-4bd1-9819-311beda19b14/conexus?orgId=1](http://grafana.40.82.176.176.nip.io/d/e678880d-2ab5-4bd1-9819-311beda19b14/conexus?orgId=1)
+  > [!TIP]
+  > Caso a rede local (como o FortiGuard da Unisanta) bloqueie o tráfego HTTP para domínios `.nip.io`, acesse de forma segura via HTTPS: [https://grafana.40.82.176.176.nip.io/d/e678880d-2ab5-4bd1-9819-311beda19b14/conexus?orgId=1](https://grafana.40.82.176.176.nip.io/d/e678880d-2ab5-4bd1-9819-311beda19b14/conexus?orgId=1)
+* **Credenciais de Acesso:**
+  * **Usuário:** `admin`
+  * **Senha:** `admin123`
 
 ---
 
