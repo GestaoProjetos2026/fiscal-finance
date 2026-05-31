@@ -7,7 +7,7 @@
 [![Flask](https://img.shields.io/badge/Flask-v3.0-lightgrey?logo=flask&logoColor=white)](https://flask.palletsprojects.com/)
 [![SQLite](https://img.shields.io/badge/SQLite-v3-blue?logo=sqlite&logoColor=white)](https://www.sqlite.org/)
 [![UI Nativo](https://img.shields.io/badge/UI-Vanilla_HTML5_/_CSS3_/_JS-orange?logo=javascript&logoColor=white)]()
-[![GitHub version](https://img.shields.io/badge/version-v1.1.1-brightgreen)](https://github.com/GestaoProjetos2026/fiscal-finance)
+[![GitHub version](https://img.shields.io/badge/version-v1.1.13-brightgreen)](https://github.com/GestaoProjetos2026/fiscal-finance)
 [![Licença](https://img.shields.io/badge/license-Academic_ERP-green)](https://github.com/GestaoProjetos2026/fiscal-finance)
 
 O **Fiscal Finance** é um módulo de alta performance web projetado para gerenciar de forma atômica e integrada as operações fiscais, financeiras e de logística de estoque de pequenas e médias empresas dentro do ecossistema Conexus ERP. 
@@ -103,6 +103,8 @@ Para rodar o Fiscal Finance em uma máquina limpa em menos de **10 minutos**, ce
    ```bash
    docker network create core-engine-main_erp-network
    ```
+   > [!TIP]
+   > Se você estiver no Windows executando o script assistente `run_docker.bat`, este passo é opcional, pois o script detecta e cria a rede de forma totalmente automática no plano de fundo!
 
 ---
 
@@ -122,6 +124,7 @@ O projeto necessita de um arquivo de configuração de variáveis na raiz. Dupli
 
 > [!NOTE]
 > As variáveis padrão contidas em `.env.example` estão otimizadas para rodar localmente no Docker sem necessidade de nenhuma alteração!
+> Caso esteja no Windows utilizando o `run_docker.bat`, a cópia e criação do arquivo `.env` a partir do modelo ocorrem de forma automática caso ele não exista na raiz.
 
 ### Passo 3: Executar a Aplicação
 
@@ -133,7 +136,7 @@ docker compose up -d --build
 
 #### Opção B: Execução via Script Assistente (Windows - Recomendado)
 Se você estiver rodando em ambiente Windows com o Docker Desktop aberto, basta dar um **duplo clique** no arquivo assistente:
-* **[run_docker.bat](run_docker.bat)**: Ele verifica as portas, valida se a rede externa existe (e a cria silenciosamente se necessário) e inicia os contêineres abrindo a SPA automaticamente no seu navegador.
+* **[run_docker.bat](run_docker.bat)**: O script assistente supremo! Ele auto-detecta a CLI do Docker instalado na máquina, verifica e cria automaticamente a rede externa `core-engine-main_erp-network` se necessário, auto-duplica o `.env` caso esteja ausente e força a remoção de contêineres homônimos antigos (evitando qualquer erro de conflito de portas ou nomes) antes de inicializar o sistema de forma limpa.
 
 
 ## 🌐 Acesso ao Ambiente de Produção (Nuvem / Kubernetes)
