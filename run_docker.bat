@@ -44,8 +44,14 @@ if not exist .env (
     )
 )
 
-:: 4. Parar containers antigos e rodar os novos
-echo Parando containers antigos, se existirem...
+:: 4. Limpar eventuais conflitos de nomes de containers no Docker
+echo Removendo conflitos de containers antigos (se houver)...
+docker rm -f container-fisc-backend >nul 2>&1
+docker rm -f container-fisc-frontend >nul 2>&1
+echo.
+
+:: 5. Parar containers antigos e rodar os novos
+echo Parando containers antigos do projeto atual, se existirem...
 %DOCKER_CMD% down
 
 echo.
