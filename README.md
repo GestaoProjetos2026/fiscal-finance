@@ -209,14 +209,12 @@ Os outros módulos interagem com o Fiscal Finance de duas formas principais:
 ### 1. Autenticação Central por SSO (OAuth2 - Password Grant)
 Qualquer usuário humano autenticado no Core Engine pode logar no Fiscal. O Fiscal troca as credenciais no Core e emite seu próprio JWT local.
 * **Endpoint:** `POST /v1/fisc/oauth/token`
-* **Payload:**
-  ```json
-  {
-    "grant_type": "password",
-    "username": "kevin@fiscal.com",
-    "password": "SenhaDoCore123!"
-  }
+* **Formato da Requisição:** `application/x-www-form-urlencoded` (Form Data)
+* **Payload (Exemplo de envio):**
+  ```ini
+  grant_type=password&username=kevin@fiscal.com&password=SenhaDoCore123!
   ```
+  *(Os valores de `username` e `password` são exemplos de credenciais e devem ser substituídos pelos dados reais do usuário).*
 * **Retorno Importante (`user.tipo`):** O JSON de sucesso retorna `"tipo": "externo"` (autenticado no Core) ou `"tipo": "local"`. O frontend consome essa flag para ocultar a aba "Gestão de Usuários" para usuários externos, redirecionando o fluxo IAM para o Core.
 
 ### 2. Leitura Rápida e Auditoria Física (APIs Públicas com `X-API-KEY`)
