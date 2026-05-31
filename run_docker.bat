@@ -30,7 +30,21 @@ if %errorlevel% neq 0 (
 )
 echo.
 
-:: 3. Parar containers antigos e rodar os novos
+:: 3. Verificar e auto-criar o arquivo .env a partir do .env.example
+if not exist .env (
+    if exist .env.example (
+        echo Arquivo .env nao encontrado na raiz.
+        echo Copiando variaveis padrao de .env.example automaticamente...
+        copy .env.example .env >nul
+        echo Arquivo .env criado com sucesso!
+        echo.
+    ) else (
+        echo [AVISO] Arquivo .env nao encontrado e .env.example nao esta presente!
+        echo.
+    )
+)
+
+:: 4. Parar containers antigos e rodar os novos
 echo Parando containers antigos, se existirem...
 %DOCKER_CMD% down
 
